@@ -1,10 +1,16 @@
-"use client"; 
+"use client";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { Heart, Star, ShoppingCart,  ChevronLeft,  ChevronRight } from "lucide-react";
+import {
+	Heart,
+	Star,
+	ShoppingCart,
+	ChevronLeft,
+	ChevronRight,
+} from "lucide-react";
 
 import { useRef } from "react";
 
@@ -126,7 +132,8 @@ export function JustForYou() {
 			name: "Men's Casual Cotton Shirt",
 			price: 1299,
 			discountPrice: 899,
-			image: "data:image/jpeg;base64,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",
+			image:
+				"data:image/jpeg;base64,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",
 			rating: 4.3,
 			reviews: 120,
 			discount: 31,
@@ -137,7 +144,8 @@ export function JustForYou() {
 			name: "Women's Floral Summer Dress",
 			price: 2199,
 			discountPrice: 1599,
-			image: "https://img.drz.lazcdn.com/static/bd/p/51512db4d36b6260bcb45551f16f5b4d.jpg_720x720q80.jpg",
+			image:
+				"https://img.drz.lazcdn.com/static/bd/p/51512db4d36b6260bcb45551f16f5b4d.jpg_720x720q80.jpg",
 			rating: 4.7,
 			reviews: 98,
 			discount: 27,
@@ -181,115 +189,115 @@ export function JustForYou() {
 		},
 	];
 
- const scrollRef = useRef(null);
+	const scrollRef = useRef(null);
 
-const scrollLeft = () => {
-  if (scrollRef.current) {
-    scrollRef.current.scrollBy({ left: -250, behavior: "smooth" });
-  }
-};
+	const scrollLeft = () => {
+		if (scrollRef.current) {
+			scrollRef.current.scrollBy({ left: -250, behavior: "smooth" });
+		}
+	};
 
-const scrollRight = () => {
-  if (scrollRef.current) {
-    scrollRef.current.scrollBy({ left: 250, behavior: "smooth" });
-  }
-};
+	const scrollRight = () => {
+		if (scrollRef.current) {
+			scrollRef.current.scrollBy({ left: 250, behavior: "smooth" });
+		}
+	};
 
 	return (
-        <section className="container mx-auto px-4 py-8">
-            <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-2xl font-bold">Just For You</h2>
-                <div className="flex gap-2">
-                    <Button variant="outline" size="icon" onClick={scrollLeft}>
-                        <ChevronLeft></ChevronLeft>
-                    </Button>
-                    <Button variant="outline" size="icon" onClick={scrollRight}>
-                      <ChevronRight></ChevronRight>
-                    </Button>
-                </div>
-            </div>
-    
-            {/* scroll */}
-            <div className="relative">
-                <div
-                    ref={scrollRef}
-                    className="flex gap-4 overflow-x-auto scroll-smooth scrollbar-hide"
-                >
-                    {products.map((product) => (
-                        <Card
-                            key={product.id}
-                            className="group relative overflow-hidden min-w-[150px] md:min-w-[180px] lg:min-w-[220px] h-full pt-0 -pb-2 rounded-t-none rounded-b-none"
-                        >
-                            <div className="relative aspect-square">
-                                <img
-                                    src={product.image}
-                                    alt={product.name}
-                                    className="absolute top-0 left-0 w-full h-full object-cover"
-                                />
-                                {product.discount && (
-                                    <span className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-xs">
-                                        -{product.discount}%
-                                    </span>
-                                )}
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="absolute top-2 right-2 rounded-full bg-background/80 backdrop-blur"
-                                >
-                                    <Heart className="h-4 w-4" />
-                                </Button>
-                            </div>
-    
-                            <div className="p-3">
-                                <h3 className="text-sm font-medium line-clamp-2 mb-2">
-                                    {product.name}
-                                </h3>
-    
-                                <div className="flex items-center gap-1 mb-2">
-                                    {[...Array(5)].map((_, i) => (
-                                        <Star
-                                            key={i}
-                                            className={`h-4 w-4 ${
-                                                i < Math.floor(product.rating)
-                                                    ? "fill-yellow-400 stroke-yellow-400"
-                                                    : "fill-muted stroke-muted"
-                                            }`}
-                                        />
-                                    ))}
-                                    <span className="text-xs text-muted-foreground ml-1">
-                                        ({product.rating})
-                                    </span>
-                                </div>
-    
-                                <div className="flex items-center gap-2">
-                                    <span className="text-lg font-bold">
-                                        BDT{product.discountPrice.toLocaleString()}
-                                    </span>
-                                    {product.price && (
-                                        <span className="text-sm text-muted-foreground line-through">
-                                            BDT{product.price.toLocaleString()}
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                        </Card>
-                    ))}
-                </div>
-            </div>
-    
-            {/* loading.. */}
-            {!products.length && (
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                    {[...Array(6)].map((_, i) => (
-                        <div key={i}>
-                            <Skeleton className="aspect-square rounded-lg" />
-                            <Skeleton className="h-4 w-full mt-2" />
-                            <Skeleton className="h-4 w-3/4 mt-1" />
-                            <Skeleton className="h-8 w-full mt-2" />
-                        </div>
-                    ))}
-                </div>
-            )}
-        </section>
-    );
+		<section className="container mx-auto px-4 py-8">
+			<div className="mb-6 flex items-center justify-between">
+				<h2 className="text-2xl font-bold">Just For You</h2>
+				<div className="flex gap-2">
+					<Button variant="outline" size="icon" onClick={scrollLeft}>
+						<ChevronLeft></ChevronLeft>
+					</Button>
+					<Button variant="outline" size="icon" onClick={scrollRight}>
+						<ChevronRight></ChevronRight>
+					</Button>
+				</div>
+			</div>
+
+			{/* scroll */}
+			<div className="relative">
+				<div
+					ref={scrollRef}
+					className="flex gap-4 overflow-x-auto scroll-smooth scrollbar-hide"
+				>
+					{products.map((product) => (
+						<Card
+							key={product.id}
+							className="group relative overflow-hidden min-w-[150px] md:min-w-[180px] lg:min-w-[220px] h-full pt-0 -pb-2 rounded-t-none rounded-b-none"
+						>
+							<div className="relative aspect-square">
+								<img
+									src={product.image}
+									alt={product.name}
+									className="absolute top-0 left-0 w-full h-full object-cover"
+								/>
+								{product.discount && (
+									<span className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-xs">
+										-{product.discount}%
+									</span>
+								)}
+								<Button
+									variant="ghost"
+									size="icon"
+									className="absolute top-2 right-2 rounded-full bg-background/80 backdrop-blur"
+								>
+									<Heart className="h-4 w-4" />
+								</Button>
+							</div>
+
+							<div className="p-3">
+								<h3 className="text-sm font-medium line-clamp-2 mb-2">
+									{product.name}
+								</h3>
+
+								<div className="flex items-center gap-1 mb-2">
+									{[...Array(5)].map((_, i) => (
+										<Star
+											key={i}
+											className={`h-4 w-4 ${
+												i < Math.floor(product.rating)
+													? "fill-yellow-400 stroke-yellow-400"
+													: "fill-muted stroke-muted"
+											}`}
+										/>
+									))}
+									<span className="text-xs text-muted-foreground ml-1">
+										({product.rating})
+									</span>
+								</div>
+
+								<div className="flex items-center gap-2">
+									<span className="text-lg font-bold">
+										BDT{product.discountPrice.toLocaleString()}
+									</span>
+									{product.price && (
+										<span className="text-sm text-muted-foreground line-through">
+											BDT{product.price.toLocaleString()}
+										</span>
+									)}
+								</div>
+							</div>
+						</Card>
+					))}
+				</div>
+			</div>
+
+			{/* loading.. */}
+			{!products.length && (
+				<div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+					{[...Array(6)].map((_, i) => (
+						<div key={i}>
+							<Skeleton className="aspect-square rounded-lg" />
+							<Skeleton className="h-4 w-full mt-2" />
+							<Skeleton className="h-4 w-3/4 mt-1" />
+							<Skeleton className="h-8 w-full mt-2" />
+						</div>
+					))}
+				</div>
+			)}
+		</section>
+	);
 }
