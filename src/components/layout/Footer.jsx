@@ -67,9 +67,9 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Daraz */}
+          {/* shopSphere */}
           <div>
-            <h4 className="font-bold text-lg mb-4">Daraz</h4>
+            <h4 className="font-bold text-lg mb-4">ShopSphere</h4>
             <ul className="space-y-2">
               {darazLinks.map((link, index) => (
                 <li key={index}>
