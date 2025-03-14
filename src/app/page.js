@@ -1,18 +1,21 @@
+import Banner from "@/components/Home/banner";
+import Categories from "@/components/Home/Categories";
+import Discount from "@/components/Home/Discount";
+import Feature from "@/components/Home/feature";
+import { JustForYou } from "@/components/Home/just";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+
 export default function Home() {
-
-
-
-    <main className="bg-gray-100 min-h-screen pb-8">
-      <div className="container mx-auto px-4">
-
-      </div>
-    </main>
-
-  
-
-
-
-  );
+	return (
+		<main className=" min-h-screen pb-8">
+			<div className="container mx-auto px-4">
+				<Banner></Banner>
+        <Categories></Categories>
+        <JustForYou></JustForYou>
+        <Feature></Feature>
+        <Discount></Discount>
+			</div>
+		</main>
+	);
 }
