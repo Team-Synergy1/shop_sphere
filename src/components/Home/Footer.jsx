@@ -13,24 +13,25 @@ const customerCareLinks = [
 ];
 
 const makeMoneyLinks = [
-  { label: "Sell on ShopSphere", href: "/sell" },
+  { label: "Sell on Daraz", href: "/sell" },
+  { label: "Affiliate Program", href: "/affiliate" },
   { label: "Become a Pickup Point", href: "/pickup-point" },
 ];
 
 const darazLinks = [
-  { label: "About ShopSphere", href: "/about" },
+  { label: "About Daraz", href: "/about" },
   { label: "Digital Payments", href: "/payments" },
   { label: "Careers", href: "/careers" },
-  { label: "ShopSphere Blog", href: "/blog" },
+  { label: "Daraz Blog", href: "/blog" },
   { label: "Privacy Policy", href: "/privacy" },
 ];
+
 
 
 export default function Footer() {
   return (
     <footer className="bg-gray-100 pt-12 pb-6">
       <div className="container mx-auto px-4">
-
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           {/* Customer Care */}
@@ -67,9 +68,9 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* shopSphere */}
+          {/* Daraz */}
           <div>
-            <h4 className="font-bold text-lg mb-4">ShopSphere</h4>
+            <h4 className="font-bold text-lg mb-4">Shop Sphere</h4>
             <ul className="space-y-2">
               {darazLinks.map((link, index) => (
                 <li key={index}>
@@ -91,13 +92,13 @@ export default function Footer() {
               <li className="flex items-start">
                 <MapPin className="h-5 w-5 text-orange-500 mr-2 flex-shrink-0 mt-0.5" />
                 <span className="text-sm text-gray-600">
-                  123 Ecommerce Street, Digital City, 10001
+                 12/3A, Banani, Dhaka
                 </span>
               </li>
               <li className="flex items-center">
                 <Phone className="h-5 w-5 text-orange-500 mr-2 flex-shrink-0" />
                 <span className="text-sm text-gray-600">
-                  +1 (800) 123-4567
+                  +88-01521763711
                 </span>
               </li>
               <li className="flex items-center">
@@ -115,6 +116,8 @@ export default function Footer() {
             </ul>
           </div>
         </div>
+
+        <Separator className="mb-8" />
 
         {/* Copyright */}
         <Separator className="mb-6" />
