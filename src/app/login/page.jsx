@@ -58,7 +58,7 @@ export default function Login() {
                 id="email"
                 name="email"
                 type="email"
-                placeholder="Please enter your Phone Number or Email"
+                placeholder="Please enter your Email"
                 value={formData.email}
                 onChange={handleChange}
                 required
@@ -157,7 +157,7 @@ export default function Login() {
 
         {/* Register Link */}
         <div className="mt-6 text-center">
-          <span className="text-sm text-gray-600">New Here? </span>
+          <span className="text-sm text-gray-600">New to ShopSphere? </span>
           <Link
             href="/register"
             className="text-sm text-orange-500 hover:underline font-medium"
