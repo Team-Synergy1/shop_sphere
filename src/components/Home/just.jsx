@@ -206,7 +206,7 @@ export function JustForYou() {
 	return (
 		<section className="container mx-auto  py-8">
 			<div className="mb-6 flex items-center justify-between">
-				<h2 className="text-2xl font-bold">Just For You</h2>
+				<h2 className="text-3xl font-bold">Just For You</h2>
 				<div className="flex gap-2">
 					<Button variant="outline" size="icon" onClick={scrollLeft}>
 						<ChevronLeft></ChevronLeft>
