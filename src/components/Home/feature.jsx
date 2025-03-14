@@ -120,7 +120,7 @@ const products = [
 
 export default function Feature() {
 	return (
-		<section className="container mx-auto px-4 py-12">
+		<section className="container mx-auto  py-12">
 			<h2 className="text-3xl font-bold mb-6">Featured Products</h2>
 
 			<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
