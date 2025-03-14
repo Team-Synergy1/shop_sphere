@@ -271,11 +271,11 @@ export function JustForYou() {
 
 								<div className="flex items-center gap-2">
 									<span className="text-lg font-bold">
-										BDT{product.discountPrice.toLocaleString()}
+										BDT.{product.discountPrice.toLocaleString()}
 									</span>
 									{product.price && (
 										<span className="text-sm text-muted-foreground line-through">
-											BDT{product.price.toLocaleString()}
+											BDT.{product.price.toLocaleString()}
 										</span>
 									)}
 								</div>
