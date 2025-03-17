@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 
 import { Badge } from "@/components/ui/badge";
 import { Star } from "lucide-react";
+import Link from "next/link";
 
 const products = [
 	{
@@ -130,11 +131,11 @@ export default function Feature() {
 						className="group relative hover:shadow-lg transition-shadow h-full pt-0 -pb-2 rounded-t-none rounded-b-none"
 					>
 						<div className="relative h-48 p-0 top-0 overflow-hidden">
-							<img
+							<Link href={`/productDetails/${product.id}`}><img
 								src={product.image}
 								alt={product.name}
 								className="absolute top-0 left-0 w-full h-full object-fit object-top"
-							/>
+							/></Link>
 							<Badge className="absolute top-2 left-2 bg-red-500 text-white text-xs">
 								-{product.discount}%
 							</Badge>
