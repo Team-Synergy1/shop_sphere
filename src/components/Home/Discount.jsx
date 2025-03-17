@@ -1,20 +1,33 @@
-'use client';
-
+"use client"
 import { Card, CardContent,  } from "@/components/ui/card";
+import axios from "axios";
+// import dbConnect from "@/lib/dbConnect";
 import {  
   Zap, 
 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 
 export default function Discount() {
+// fetch using lib
+//   const discountCollection= await dbConnect("Deals");
+// const flashDeals = await discountCollection.find().toArray();
 
-  const flashDeals = [
-    { discount: "50% OFF", limit: "Limited to first 100 users", progress: 75 },
-    { discount: "₹500 OFF", limit: "Min. spend ₹2000", progress: 45 },
-    { discount: "80% OFF", limit: "Selected items only", progress: 90 },
-  ];
-  
-  
+//fetch using api
+const [flashDeals, setFlashDeals] = useState([]);
+
+useEffect(() => {
+  async function fetchData() {
+    try {
+      const response = await axios.get('/api/deals'); // Use Axios to fetch data
+      setFlashDeals(response.data); // Axios stores the response data in `response.data`
+    } catch (error) {
+      console.log(error.message);
+    } 
+  }
+
+  fetchData();
+}, []);
   return (
     <div className="container mx-auto py-8">
       {/* Flash Deals */}
