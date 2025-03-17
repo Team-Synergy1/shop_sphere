@@ -32,9 +32,9 @@ export default function Footer() {
   return (
     <footer className="bg-gray-100 pt-12 pb-6">
       <div className="container mx-auto px-4">
-        {/* Main Footer Content */}
+       
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-          {/* Customer Care */}
+       
           <div>
             <h4 className="font-bold text-lg mb-4">Customer Care</h4>
             <ul className="space-y-2">
@@ -51,7 +51,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Make Money with Us */}
+         
           <div>
             <h4 className="font-bold text-lg mb-4">Make Money with Us</h4>
             <ul className="space-y-2">
@@ -68,7 +68,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Daraz */}
+       
           <div>
             <h4 className="font-bold text-lg mb-4">Shop Sphere</h4>
             <ul className="space-y-2">
