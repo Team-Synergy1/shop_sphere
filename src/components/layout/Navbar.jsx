@@ -1,3 +1,5 @@
+"use client"
+
 import React from "react";
 import Link from "next/link";
 import { Search, ShoppingCart, Heart, User, Bell, ChevronDown, Menu } from "lucide-react";
@@ -13,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { usePathname } from "next/navigation";
 
 const categories = [
   { name: "Electronics", url: "/category/electronics" },
@@ -26,7 +29,11 @@ const categories = [
 ];
 
 export default function Navbar() {
-  return (
+
+  const pathName=usePathname();
+
+  if(!pathName.includes("dashboard")){ 
+     return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
 
       {/* Main navbar */}
@@ -184,5 +191,6 @@ export default function Navbar() {
         </div>
       </div>
     </header>
-  );
+  );}
+
 };
