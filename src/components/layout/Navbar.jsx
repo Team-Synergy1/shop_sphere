@@ -2,8 +2,8 @@
 
 import React from "react";
 import Link from "next/link";
-import { Search, ShoppingCart, Heart, User, Bell, ChevronDown, Menu } from "lucide-react";
-
+import { Search, ShoppingCart, Heart, User, Bell, ChevronDown, Menu, Package, LogOut } from "lucide-react";
+import { useSession, signOut } from 'next-auth/react';
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,8 +14,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+
+import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Separator } from "../ui/separator";
+
 import { usePathname } from "next/navigation";
+
 
 const categories = [
   { name: "Electronics", url: "/category/electronics" },
@@ -30,10 +34,20 @@ const categories = [
 
 export default function Navbar() {
 
+  const { data: session } = useSession();
+  // Handler for logout
+  const handleLogout = () => {
+    signOut({ callbackUrl: '/' });
+  };
+
+  return (
+
+
   const pathName=usePathname();
 
   if(!pathName.includes("dashboard")){ 
      return (
+
     <header className="sticky top-0 z-50 bg-white shadow-sm">
 
       {/* Main navbar */}
@@ -42,13 +56,19 @@ export default function Navbar() {
           {/* Mobile menu trigger */}
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
+              <Button variant="ghost" className="md:hidden cursor-pointer">
                 <Menu size={24} />
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-64">
-              <div className="py-4">
-                <h3 className="font-bold text-lg mb-4">Categories</h3>
+              <SheetHeader className="sticky top-0 border-b z-50">
+                <SheetTitle className="text-2xl text-orange-500">ShopSphere</SheetTitle>
+                <SheetDescription>
+                  A Multi-vendor E-commerce Site
+                </SheetDescription>
+              </SheetHeader>
+              <div className="px-4 overflow-y-auto">
+                <h3 className="text-sm font-medium mb-3 uppercase">Categories</h3>
                 <div className="space-y-2">
                   {categories.map((category) => (
                     <Link
@@ -60,7 +80,46 @@ export default function Navbar() {
                     </Link>
                   ))}
                 </div>
+                <Separator className="my-2" />
+                <h3 className="text-sm font-medium my-3 uppercase">HELP & SETTINGS</h3>
+                <div className="space-y-2">
+                  <Link
+                    href="/help-center"
+                    className="block py-2 px-4 hover:bg-orange-50 hover:text-orange-500 rounded-md"
+                  >
+                    Help Center
+                  </Link>
+                  <Link
+                    href="/sell"
+                    className="block py-2 px-4 hover:bg-orange-50 hover:text-orange-500 rounded-md"
+                  >
+                    Sell on ShopSphere
+                  </Link>
+                  <Link
+                    href="/contact"
+                    className="block py-2 px-4 hover:bg-orange-50 hover:text-orange-500 rounded-md"
+                  >
+                    Contact Us
+                  </Link>
+                </div>
               </div>
+              <SheetFooter className="sticky bottom-0 border-t z-50">
+                <SheetClose asChild>
+                  {session ? (
+                    <Button
+                      variant="destructive"
+                      className={"cursor-pointer"}
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Logout
+                    </Button>) : (
+                    <Button asChild className="bg-orange-500 hover:bg-orange-600">
+                      <Link href="/login">Login</Link>
+                    </Button>
+                  )}
+                </SheetClose>
+              </SheetFooter>
             </SheetContent>
           </Sheet>
 
@@ -104,56 +163,91 @@ export default function Navbar() {
             </Link>
 
             {/* Notifications */}
-            <Link href="/notifications" className="flex flex-col items-center p-1 text-gray-700 hover:text-orange-500  sm:flex">
-              <div className="relative">
-                <Bell size={24} />
-                <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                  2
-                </span>
-              </div>
-              <span className="text-xs hidden md:inline-block">Notifications</span>
-            </Link>
+            {session && (
+              <Link href="/notifications" className="flex flex-col items-center p-1 text-gray-700 hover:text-orange-500  sm:flex">
+                <div className="relative">
+                  <Bell size={24} />
+                  <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                    2
+                  </span>
+                </div>
+                <span className="text-xs hidden md:inline-block">Notifications</span>
+              </Link>)}
 
             {/* User dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex flex-col items-center p-1 h-auto">
-                  <User size={24} />
-                  <span className="text-xs items-center hidden md:flex">
-                    Account <ChevronDown size={12} className="ml-1" />
-                  </span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Link href="/login" className="w-full">Login</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Link href="/register" className="w-full">Sign Up</Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Link href="/account/profile" className="w-full">My Profile</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Link href="/account/orders" className="w-full">My Orders</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Link href="/account/returns" className="w-full">My Returns</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Link href="/account/cancellations" className="w-full">My Cancellations</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Link href="/account/reviews" className="w-full">My Reviews</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Link href="/account/vouchers" className="w-full">My Vouchers</Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {session ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex flex-col items-center p-1 h-auto">
+                    <User size={24} />
+                    <span className="text-xs items-center hidden md:flex">
+                      {session && session.user.name} <ChevronDown size={12} className="ml-1" />
+                    </span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>Welcome, {session.user.name}</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuItem>
+                    <Link href="/account/profile" className="w-full">My Profile</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href="/account/orders" className="w-full">My Orders</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href="/account/returns" className="w-full">My Returns</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href="/account/cancellations" className="w-full">My Cancellations</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href="/account/reviews" className="w-full">My Reviews</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href="/account/vouchers" className="w-full">My Vouchers</Link>
+                  </DropdownMenuItem>
+                  {session.user.role === 'user' && (
+                    <DropdownMenuItem asChild className={"cursor-pointer"}>
+                      <Link href="/dashboard/user">
+                        Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  {session.user.role === 'vendor' && (
+                    <DropdownMenuItem asChild className={"cursor-pointer"}>
+                      <Link href="/dashboard/vendor" className="flex items-center gap-2">
+                        <Package className="h-4 w-4" />
+                        <span>Seller Center</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  {session.user.role === 'admin' && (
+                    <DropdownMenuItem asChild className={"cursor-pointer"}>
+                      <Link href="/dashboard/admin" className="flex items-center gap-2">
+                        <Package className="h-4 w-4" />
+                        <span>Admin Panel</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
+                  <Button
+                    variant="destructive"
+                    size={"sm"}
+                    className={"w-full cursor-pointer"}
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Logout
+                  </Button>
+
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button asChild className="bg-orange-500 hover:bg-orange-600">
+                <Link href="/login">Login</Link>
+              </Button>
+            )}
           </div>
         </div>
 
