@@ -35,12 +35,12 @@ const categories = [
 export default function Navbar() {
 
   const { data: session } = useSession();
-  // Handler for logout
+  
   const handleLogout = () => {
     signOut({ callbackUrl: '/' });
   };
 
-  return (
+
 
 
   const pathName=usePathname();
