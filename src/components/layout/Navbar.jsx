@@ -14,8 +14,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Separator } from "../ui/separator";
+
+import { usePathname } from "next/navigation";
+
 
 const categories = [
   { name: "Electronics", url: "/category/electronics" },
@@ -29,6 +33,7 @@ const categories = [
 ];
 
 export default function Navbar() {
+
   const { data: session } = useSession();
   // Handler for logout
   const handleLogout = () => {
@@ -36,6 +41,13 @@ export default function Navbar() {
   };
 
   return (
+
+
+  const pathName=usePathname();
+
+  if(!pathName.includes("dashboard")){ 
+     return (
+
     <header className="sticky top-0 z-50 bg-white shadow-sm">
 
       {/* Main navbar */}
@@ -273,5 +285,6 @@ export default function Navbar() {
         </div>
       </div>
     </header>
-  );
+  );}
+
 };
