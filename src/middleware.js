@@ -7,21 +7,21 @@ export async function middleware(req) {
 	const { pathname } = req.nextUrl;
 
 	// Protect routes that require authentication
-	if (pathname.startsWith("/dashboard") || pathname.startsWith("/profile")) {
+	if (pathname?.startsWith("/dashboard") || pathname?.startsWith("/profile")) {
 		if (!token) {
 			return NextResponse.redirect(new URL("/login", req.url));
 		}
 	}
 
 	// Protect admin routes
-	if (pathname.startsWith("/admin")) {
+	if (pathname?.startsWith("/admin")) {
 		if (!token || token.role !== "admin") {
 			return NextResponse.redirect(new URL("/unauthorized", req.url));
 		}
 	}
 
 	// Protect vendor routes
-	if (pathname.startsWith("/vendor")) {
+	if (pathname?.startsWith("/vendor")) {
 		if (!token || token.role !== "vendor") {
 			return NextResponse.redirect(new URL("/unauthorized", req.url));
 		}
