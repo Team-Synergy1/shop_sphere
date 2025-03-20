@@ -34,7 +34,7 @@ const navigationByRole = {
 			icon: Package,
 			submenu: [
 				{ name: "All Products", href: "/dashboard/products" },
-				{ name: "Add Product", href: "/dashboard/products/add" },
+				{ name: "Add Product", href: "/product" },
 			],
 		},
 		{ name: "Categories", href: "/dashboard/categories", icon: Tag },
