@@ -209,7 +209,7 @@ export default function Navbar() {
                   </DropdownMenuItem>
                   {session.user.role === 'user' && (
                     <DropdownMenuItem asChild className={"cursor-pointer"}>
-                      <Link href="/dashboard/user">
+                      <Link href="/user-dashboard">
                         Dashboard
                       </Link>
                     </DropdownMenuItem>
