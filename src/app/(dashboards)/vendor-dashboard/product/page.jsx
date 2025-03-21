@@ -74,7 +74,7 @@ export default function AddProductPage() {
 	const [activeTab, setActiveTab] = useState("basic");
 	const [showSubcategories, setShowSubcategories] = useState(false);
 	const image_host_key = process.env.NEXT_PUBLIC_IMAGE;
-	console.log(image_host_key);
+	
 	const image_host_Api = `https://api.imgbb.com/1/upload?key=${image_host_key}`;
 	const [isUploading, setIsUploading] = useState(false);
 
@@ -259,11 +259,11 @@ export default function AddProductPage() {
 					return data.data.url; 
 				});
 
-				// Wait for all uploads to complete
+				
 				const newImageUrls = await Promise.all(uploadPromises);
-				console.log("New image URLs:", newImageUrls);
+				
 
-				// Add new image URLs to existing images
+				// add new image URLs to existing images
 				setImages([...images, ...newImageUrls]);
 			} catch (error) {
 				console.error("Error uploading images:", error);
@@ -285,15 +285,17 @@ export default function AddProductPage() {
 	const onSubmit = async (data) => {
 		try {
 			
+			const formattedSpecs = Object.entries(specs).map(([key, value]) => `${key}: ${value}`);
+    
 			const productData = {
-				...data,
-				colors,
-				features,
-				specs,
-				images,
+			  ...data,
+			  colors,
+			  features,
+			  specs: formattedSpecs, 
+			  images,
 			};
 			console.log(productData);
-			// Send data to your API endpoint
+			
 			const response = await fetch("/api/products", {
 				method: "POST",
 				headers: {
