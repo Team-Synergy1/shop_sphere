@@ -34,7 +34,7 @@ const navigationByRole = {
 			icon: Package,
 			submenu: [
 				{ name: "All Products", href: "/dashboard/products" },
-				{ name: "Add Product", href: "/product" },
+				{ name: "Add Product", href: "/dashboard/product" },
 			],
 		},
 		{ name: "Categories", href: "/dashboard/categories", icon: Tag },
@@ -47,7 +47,7 @@ const navigationByRole = {
 	vendor: [
 		{ name: "Dashboard", href: "/dashboard", icon: Home },
 		{ name: "My Products", href: "/dashboard/products", icon: Package },
-		{ name: "Add Product", href: "/product", icon: Package },
+		{ name: "Add Product", href: "/vendor-dashboard/product", icon: Package },
 		{ name: "Orders", href: "/dashboard/orders", icon: ShoppingBag, badge: "" },
 		{ name: "Store Settings", href: "/dashboard/store", icon: Store },
 		{ name: "Earnings", href: "/dashboard/earnings", icon: CreditCard },
