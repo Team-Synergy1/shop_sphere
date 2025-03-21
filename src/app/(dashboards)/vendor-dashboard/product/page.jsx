@@ -74,7 +74,7 @@ export default function AddProductPage() {
 	const [activeTab, setActiveTab] = useState("basic");
 	const [showSubcategories, setShowSubcategories] = useState(false);
 	const image_host_key = process.env.NEXT_PUBLIC_IMAGE;
-	console.log(image_host_key);
+
 	const image_host_Api = `https://api.imgbb.com/1/upload?key=${image_host_key}`;
 	const [isUploading, setIsUploading] = useState(false);
 
@@ -91,7 +91,7 @@ export default function AddProductPage() {
 				});
 		}
 	}, []);
-	
+
 	const categories = [
 		{
 			id: "electronics",
@@ -170,7 +170,7 @@ export default function AddProductPage() {
 	const selectedCategory = form.watch("category");
 
 	React.useEffect(() => {
-		// reset subcategory 
+		// reset subcategory
 		form.setValue("subcategory", "");
 
 		// check if selected category has subcategories
@@ -225,7 +225,6 @@ export default function AddProductPage() {
 		setSpecs(newSpecs);
 	};
 	const handleImageUpload = async (e) => {
-		
 		if (!e.target || !e.target.files) {
 			console.error("No files selected or files property is undefined");
 			return;
@@ -238,7 +237,6 @@ export default function AddProductPage() {
 				setIsUploading(true);
 				console.log(`Attempting to upload ${files.length} files`);
 
-				
 				const uploadPromises = files.map(async (file) => {
 					const formData = new FormData();
 					formData.append("image", file);
@@ -256,14 +254,12 @@ export default function AddProductPage() {
 
 					const data = await response.json();
 					console.log("Upload response:", data);
-					return data.data.url; 
+					return data.data.url;
 				});
 
-				// Wait for all uploads to complete
 				const newImageUrls = await Promise.all(uploadPromises);
-				console.log("New image URLs:", newImageUrls);
 
-				// Add new image URLs to existing images
+				// add new image URLs to existing images
 				setImages([...images, ...newImageUrls]);
 			} catch (error) {
 				console.error("Error uploading images:", error);
@@ -276,7 +272,6 @@ export default function AddProductPage() {
 		}
 	};
 
-
 	const removeImage = (imageToRemove) => {
 		setImages(images.filter((image) => image !== imageToRemove));
 	};
@@ -284,16 +279,17 @@ export default function AddProductPage() {
 	// form submission
 	const onSubmit = async (data) => {
 		try {
-			
+			const formattedSpecs = Object.entries(specs).map(([key, value]) => `${key}: ${value}`
+			);
+
 			const productData = {
 				...data,
 				colors,
 				features,
-				specs,
+				specs: formattedSpecs, // This will be an array of strings like ["key1: value1", "key2: value2"]
 				images,
 			};
-			console.log(productData);
-			// Send data to your API endpoint
+
 			const response = await fetch("/api/products", {
 				method: "POST",
 				headers: {
@@ -310,8 +306,6 @@ export default function AddProductPage() {
 			console.log("product created:", result);
 
 			alert("Product created successfully!");
-
-			
 		} catch (error) {
 			console.error("Error creating product:", error);
 			alert("Failed to create product: " + error.message);
