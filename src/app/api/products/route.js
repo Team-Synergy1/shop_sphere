@@ -1,63 +1,91 @@
 import { connectDB } from "@/lib/db";
 import Product from "@/models/Product";
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "../auth/[...nextauth]/route";
+ // Adjust path as needed
 
 export async function POST(req) {
-	try {
-		await connectDB();
+    try {
+        // Connect to database
+        await connectDB();
 
-		const body = await req.json();
+        // Get server-side session
+        const session = await getServerSession(authOptions);
 
-		const { name, category, price, stock } = body;
-		if (Array.isArray(body.specs)) {
-			const specsObject = {};
-			body.specs.forEach((spec) => {
-				const [key, value] = spec.split(": ");
-				if (key && value) {
-					specsObject[key] = value;
-				}
-			});
-			body.specs = specsObject;
-		}
+        // Check if user is authenticated
+        if (!session || !session.user) {
+            return NextResponse.json(
+                { message: "Unauthorized. Please log in." }, 
+                { status: 401 }
+            );
+        }
 
-		if (!name || !category || price === undefined || stock === undefined) {
-			return NextResponse.json(
-				{ message: "Missing required fields" },
-				{ status: 400 }
-			);
-		}
+       
+        const body = await req.json();
+        console.log("Received body:", body);
 
-		const product = new Product(body);
+        if (Array.isArray(body.specs)) {
+            const specsObject = {};
+            body.specs.forEach((spec) => {
+                const [key, value] = spec.split(": ");
+                if (key && value) {
+                    specsObject[key] = value;
+                }
+            });
+            body.specs = specsObject;
+        }
 
-		const savedProduct = await product.save();
-		console.log("Product saved successfully:", savedProduct._id);
+        const { name, category, price, stock } = body;
+        if (!name || !category || price === undefined || stock === undefined) {
+            return NextResponse.json(
+                { message: "Missing required fields" },
+                { status: 400 }
+            );
+        }
 
-		return NextResponse.json({
-			message: "Product added",
-			product: savedProduct,
-		});
-	} catch (error) {
-		console.error("Error saving product:", error.name, error.message);
-		console.error(error.stack);
-		return NextResponse.json(
-			{ message: "Error saving product", error: error.message },
-			{ status: 500 }
-		);
-	}
+     
+        const productData = {
+            ...body,
+            vendor: session.user.id 
+        };
+
+        const product = new Product(productData);
+
+        // Save product
+        const savedProduct = await product.save();
+        console.log("Product saved successfully:", savedProduct._id);
+
+        return NextResponse.json({
+            message: "Product added",
+            product: savedProduct,
+        });
+    } catch (error) {
+        console.error("Error saving product:", error.name, error.message);
+        console.error(error.stack);
+        return NextResponse.json(
+            { 
+                message: "Error saving product", 
+                error: error.message,
+                stack: error.stack 
+            },
+            { status: 500 }
+        );
+    }
 }
 
 export async function GET() {
-	try {
-		await connectDB();
+    try {
+        await connectDB();
 
-		const products = await Product.find({});
-		return NextResponse.json(products); 
-	} catch (error) {
-		console.error("Error retrieving products:", error.message);
-		return NextResponse.json(
-			{ message: "Error retrieving products", error: error.message },
-			{ status: 500 }
-		);
-	}
+      
+        const products = await Product.find({})
+        return NextResponse.json(products); 
+    } catch (error) {
+        console.error("Error retrieving products:", error.message);
+        return NextResponse.json(
+            { message: "Error retrieving products", error: error.message },
+            { status: 500 }
+        );
+    }
 }
-

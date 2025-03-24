@@ -116,22 +116,16 @@ export default function DashboardLayout({ children }) {
 			router.push("/login");
 		} else if (session.user.role === "admin") {
 			router.push("/dashboard/admin");
-		} else if (session.user.role === "vendor") {
+		} else if (session.user.role === "") {
 			router.push("/dashboard/vendor");
 		} else if (session.user.role === "user") {
 			router.push("/dashboard/user");
 		}
 	}, [session, status, router]);
 
-	if (status === "loading") {
-		return (
-			<div className="flex justify-center items-center min-h-screen">
-				Loading...
-			</div>
-		);
-	}
 
-	if (session?.user?.role === "vendor") {
+
+	if (session?.user?.role === "vendor" ) {
 		navItems = [
 			{
 				href: "/dashboard/vendor",

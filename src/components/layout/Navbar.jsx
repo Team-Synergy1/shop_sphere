@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React from "react";
 import Link from "next/link";
@@ -35,7 +35,7 @@ const categories = [
 export default function Navbar() {
 
   const { data: session } = useSession();
-  console.log(session);
+
   
   const handleLogout = () => {
     signOut({ callbackUrl: '/' });

@@ -40,6 +40,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 
+
 // Form schema
 const productSchema = z.object({
 	name: z
@@ -59,9 +60,12 @@ const productSchema = z.object({
 	inStock: z.boolean().default(true),
 	shipping: z.string().optional(),
 	delivery: z.string().optional(),
+	vendor: z.string().optional(),
 });
 
 export default function AddProductPage() {
+	
+
 	const router = useRouter();
 	const [colors, setColors] = useState([]);
 	const [features, setFeatures] = useState([]);
@@ -279,17 +283,19 @@ export default function AddProductPage() {
 	// form submission
 	const onSubmit = async (data) => {
 		try {
-			const formattedSpecs = Object.entries(specs).map(([key, value]) => `${key}: ${value}`
+			const formattedSpecs = Object.entries(specs).map(
+				([key, value]) => `${key}: ${value}`
 			);
 
 			const productData = {
 				...data,
 				colors,
 				features,
-				specs: formattedSpecs, // This will be an array of strings like ["key1: value1", "key2: value2"]
+				specs: formattedSpecs, 
 				images,
+			
 			};
-
+			console.log(productData);
 			const response = await fetch("/api/products", {
 				method: "POST",
 				headers: {
