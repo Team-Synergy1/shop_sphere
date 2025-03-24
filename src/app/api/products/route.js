@@ -9,16 +9,16 @@ export async function POST(req) {
 		const body = await req.json();
 
 		const { name, category, price, stock } = body;
-        if (Array.isArray(body.specs)) {
-            const specsObject = {};
-            body.specs.forEach(spec => {
-              const [key, value] = spec.split(': ');
-              if (key && value) {
-                specsObject[key] = value;
-              }
-            });
-            body.specs = specsObject;
-          }
+		if (Array.isArray(body.specs)) {
+			const specsObject = {};
+			body.specs.forEach((spec) => {
+				const [key, value] = spec.split(": ");
+				if (key && value) {
+					specsObject[key] = value;
+				}
+			});
+			body.specs = specsObject;
+		}
 
 		if (!name || !category || price === undefined || stock === undefined) {
 			return NextResponse.json(
@@ -45,3 +45,19 @@ export async function POST(req) {
 		);
 	}
 }
+
+export async function GET() {
+	try {
+		await connectDB();
+
+		const products = await Product.find({});
+		return NextResponse.json(products); 
+	} catch (error) {
+		console.error("Error retrieving products:", error.message);
+		return NextResponse.json(
+			{ message: "Error retrieving products", error: error.message },
+			{ status: 500 }
+		);
+	}
+}
+
