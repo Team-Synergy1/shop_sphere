@@ -43,6 +43,7 @@ export default function RootLayout({ children }) {
 				<AuthProvider>
 					<QueryClientProvider client={queryClient}>
 						<Navbar />
+       
 
 						{children}
 						<Footer />

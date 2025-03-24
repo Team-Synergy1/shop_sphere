@@ -13,19 +13,19 @@ export async function middleware(req) {
 		}
 	}
 
-	// Protect admin routes
-	if (pathname?.startsWith("/admin")) {
-		if (!token || token.role !== "admin") {
-			return NextResponse.redirect(new URL("/unauthorized", req.url));
-		}
-	}
+	// // Protect admin routes
+	// if (pathname?.startsWith("/admin")) {
+	// 	if (!token || token.role !== "admin") {
+	// 		return NextResponse.redirect(new URL("/unauthorized", req.url));
+	// 	}
+	// }
 
-	// Protect vendor routes
-	if (pathname?.startsWith("/vendor")) {
-		if (!token || token.role !== "vendor") {
-			return NextResponse.redirect(new URL("/unauthorized", req.url));
-		}
-	}
+	// // Protect vendor routes
+	// if (pathname?.startsWith("/vendor")) {
+	// 	if (!token || token.role !== "vendor") {
+	// 		return NextResponse.redirect(new URL("/unauthorized", req.url));
+	// 	}
+	// }
 
 	return NextResponse.next();
 }
