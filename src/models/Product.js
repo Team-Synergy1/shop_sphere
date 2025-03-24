@@ -16,6 +16,11 @@ const productSchema = new mongoose.Schema({
 	features: [{ type: String }],
 	specs: { type: mongoose.Schema.Types.Mixed },
 	images: [{ type: String }],
+	vendor: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: "User", 
+		required: true,
+	},
 });
 
 const Product =
