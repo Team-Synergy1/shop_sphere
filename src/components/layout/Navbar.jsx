@@ -35,6 +35,7 @@ const categories = [
 export default function Navbar() {
 
   const { data: session } = useSession();
+  console.log(session);
   
   const handleLogout = () => {
     signOut({ callbackUrl: '/' });
@@ -209,7 +210,7 @@ export default function Navbar() {
                   </DropdownMenuItem>
                   {session.user.role === 'user' && (
                     <DropdownMenuItem asChild className={"cursor-pointer"}>
-                      <Link href="/user-dashboard">
+                      <Link href="/dashboard/user">
                         Dashboard
                       </Link>
                     </DropdownMenuItem>
