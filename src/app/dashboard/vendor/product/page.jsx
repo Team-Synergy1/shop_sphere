@@ -40,12 +40,14 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 
-
 // Form schema
 const productSchema = z.object({
 	name: z
 		.string()
 		.min(3, { message: "Product name must be at least 3 characters" }),
+	brand: z
+		.string()
+		.min(2, { message: "Brand name must be at least 2 characters" }),
 	category: z.string({ message: "Please select a category" }),
 	subcategory: z.string().optional(),
 	price: z.coerce
@@ -64,8 +66,6 @@ const productSchema = z.object({
 });
 
 export default function AddProductPage() {
-	
-
 	const router = useRouter();
 	const [colors, setColors] = useState([]);
 	const [features, setFeatures] = useState([]);
@@ -157,6 +157,7 @@ export default function AddProductPage() {
 		resolver: zodResolver(productSchema),
 		defaultValues: {
 			name: "",
+			brand: "",
 			category: "",
 			subcategory: "",
 			price: 0,
@@ -291,9 +292,8 @@ export default function AddProductPage() {
 				...data,
 				colors,
 				features,
-				specs: formattedSpecs, 
+				specs: formattedSpecs,
 				images,
-			
 			};
 			console.log(productData);
 			const response = await fetch("/api/products", {
@@ -310,6 +310,18 @@ export default function AddProductPage() {
 
 			const result = await response.json();
 			console.log("product created:", result);
+
+			// Reset form and related states
+			form.reset(); // Reset form values to default
+			setColors([]); // Clear colors
+			setFeatures([]); // Clear features
+			setSpecs({}); // Clear specs
+			setImages([]); // Clear images
+			setNewColor(""); // Reset new color input
+			setNewFeature(""); // Reset new feature input
+			setNewSpecKey(""); // Reset new spec key input
+			setNewSpecValue(""); // Reset new spec value input
+			setActiveTab("basic"); // Reset to basic tab
 
 			alert("Product created successfully!");
 		} catch (error) {
@@ -380,6 +392,25 @@ export default function AddProductPage() {
 									/>
 
 									<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+										<FormField
+											control={form.control}
+											name="brand"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Brand</FormLabel>
+													<FormControl>
+														<Input
+															placeholder="Apple, Samsung, Sony"
+															{...field}
+														/>
+													</FormControl>
+													<FormDescription>
+														The manufacturer or brand of the product
+													</FormDescription>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
 										<FormField
 											control={form.control}
 											name="category"

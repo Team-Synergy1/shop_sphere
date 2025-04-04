@@ -2,6 +2,11 @@ import mongoose from "mongoose";
 
 const productSchema = new mongoose.Schema({
 	name: { type: String, required: true },
+	brand: {
+		type: String,
+		required:true,
+		minlength: 2,
+	  },
 	category: { type: String, required: true },
 	subcategory: { type: String },
 	price: { type: Number, required: true },
@@ -16,9 +21,9 @@ const productSchema = new mongoose.Schema({
 	features: [{ type: String }],
 	specs: { type: mongoose.Schema.Types.Mixed },
 	images: [{ type: String }],
-	vendor: {
+	v_id: {
 		type: mongoose.Schema.Types.ObjectId,
-		ref: "User", 
+		ref: "User",
 		required: true,
 	},
 });
