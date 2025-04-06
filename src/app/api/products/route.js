@@ -51,7 +51,7 @@ export async function GET() {
 		await connectDB();
 
 		const products = await Product.find({});
-		return NextResponse.json(products); 
+		return NextResponse.json(products);
 	} catch (error) {
 		console.error("Error retrieving products:", error.message);
 		return NextResponse.json(
@@ -61,3 +61,25 @@ export async function GET() {
 	}
 }
 
+export async function PUT(req, { params: { id } }) {
+	try {
+		await connectDB();
+
+		
+
+		const body = await req.json();
+		const product = await Product.findByIdAndUpdate(id, body, { new: true });
+
+		if (!product) {
+			return NextResponse.json({ message: "Product not found" }, { status: 404 });
+		}
+
+		return NextResponse.json(product, { status: 200 });
+	} catch (error) {
+		console.error("Error updating product:", error.message);
+		return NextResponse.json(
+			{ message: "Error updating product", error: error.message },
+			{ status: 500 }
+		);
+	}
+}
