@@ -116,16 +116,22 @@ export default function DashboardLayout({ children }) {
 			router.push("/login");
 		} else if (session.user.role === "admin") {
 			router.push("/dashboard/admin");
-		} else if (session.user.role === "") {
+		} else if (session.user.role === "vendor") {
 			router.push("/dashboard/vendor");
 		} else if (session.user.role === "user") {
 			router.push("/dashboard/user");
 		}
 	}, [session, status, router]);
 
+	if (status === "loading") {
+		return (
+			<div className="flex justify-center items-center min-h-screen">
+				Loading...
+			</div>
+		);
+	}
 
-
-	if (session?.user?.role === "vendor" ) {
+	if (session?.user?.role === "vendor") {
 		navItems = [
 			{
 				href: "/dashboard/vendor",
@@ -133,7 +139,7 @@ export default function DashboardLayout({ children }) {
 				label: "Dashboard",
 			},
 			{
-				href: "/dashboard/vendor/products",
+				href: "/dashboard/vendor/allProduct",
 				icon: <Package className="h-5 w-5" />,
 				label: "Products",
 			},
@@ -244,7 +250,6 @@ export default function DashboardLayout({ children }) {
 									<SheetTitle className="text-2xl text-orange-500">
 										ShopSphere
 									</SheetTitle>
-									
 								</Link>
 							</SheetHeader>
 
@@ -270,7 +275,6 @@ export default function DashboardLayout({ children }) {
 					<div className="flex p-4 items-center">
 						<Link href="/" className=" font-semibold">
 							<h3 className="text-xl ">ShopSphere</h3>
-							
 						</Link>
 					</div>
 					<nav className="flex flex-col gap-2 p-4">

@@ -37,20 +37,22 @@ export default function RootLayout({ children }) {
 					content="A modern multi-vendor e-commerce platform"
 				/>
 			</head>
+			<AuthProvider>
 			<body
 				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
 			>
-				<AuthProvider>
+				
 					<QueryClientProvider client={queryClient}>
 						<Navbar />
        
 
 						{children}
 						<Footer />
-						<Toaster position="top-center" />
+						<Toaster position="top-center" richColors="true"/>
 					</QueryClientProvider>
-				</AuthProvider>
+			
 			</body>
+			</AuthProvider>
 		</html>
 	);
 }
