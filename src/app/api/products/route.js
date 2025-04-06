@@ -3,17 +3,17 @@ import Product from "@/models/Product";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]/route";
-// Adjust path as needed
+
 
 export async function POST(req) {
 	try {
-		// Connect to database
+		
 		await connectDB();
 
-		// Get server-side session
+		
 		const session = await getServerSession(authOptions);
 
-		// Check if user is authenticated
+	
 		if (!session || !session.user) {
 			return NextResponse.json(
 				{ message: "Unauthorized. Please log in." },
@@ -86,3 +86,5 @@ export async function GET() {
 		);
 	}
 }
+
+

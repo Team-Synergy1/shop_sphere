@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 // Form schema
 const productSchema = z.object({
@@ -323,10 +324,10 @@ export default function AddProductPage() {
 			setNewSpecValue(""); // Reset new spec value input
 			setActiveTab("basic"); // Reset to basic tab
 
-			alert("Product created successfully!");
+			toast.success("Product created successfully");
 		} catch (error) {
 			console.error("Error creating product:", error);
-			alert("Failed to create product: " + error.message);
+			toast.error("Failed to create product: " + error.message);
 		}
 	};
 	return (

@@ -109,17 +109,27 @@ export default function DashboardLayout({ children }) {
 	];
 	let title = "My Account";
 
-	// useEffect(() => {
-	// 	if (!session) {
-	// 		router.push("/login");
-	// 	} else if (session.user.role === "admin") {
-	// 		router.push("/dashboard/admin");
-	// 	} else if (session.user.role === "vendor") {
-	// 		router.push("/dashboard/vendor");
-	// 	} else if (session.user.role === "user") {
-	// 		router.push("/dashboard/user");
-	// 	}
-	// }, [session, status, router]);
+	useEffect(() => {
+		if (status === "loading") return;
+
+		if (!session) {
+			router.push("/login");
+		} else if (session.user.role === "admin") {
+			router.push("/dashboard/admin");
+		} else if (session.user.role === "vendor") {
+			router.push("/dashboard/vendor");
+		} else if (session.user.role === "user") {
+			router.push("/dashboard/user");
+		}
+	}, [session, status, router]);
+
+	if (status === "loading") {
+		return (
+			<div className="flex justify-center items-center min-h-screen">
+				Loading...
+			</div>
+		);
+	}
 
 	if (session?.user?.role === "vendor") {
 		navItems = [
@@ -129,7 +139,7 @@ export default function DashboardLayout({ children }) {
 				label: "Dashboard",
 			},
 			{
-				href: "/dashboard/vendor/products",
+				href: "/dashboard/vendor/allProduct",
 				icon: <Package className="h-5 w-5" />,
 				label: "Products",
 			},

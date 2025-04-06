@@ -48,7 +48,7 @@ export default function RootLayout({ children }) {
 
 						{children}
 						<Footer />
-						<Toaster position="top-center" />
+						<Toaster position="top-center" richColors="true"/>
 					</QueryClientProvider>
 			
 			</body>
