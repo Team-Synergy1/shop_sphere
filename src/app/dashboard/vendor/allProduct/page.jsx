@@ -16,12 +16,14 @@ import {
 	Upload,
 } from "lucide-react";
 import useProduct from "@/hooks/useProduct";
+import { toast } from "sonner";
+import Link from "next/link";
 
 const ProductsManager = () => {
 	const [productData, loading, refetch] = useProduct();
 	const [products, setProducts] = useState([]);
+
 	
-	// Update local state when products are fetched
 	useEffect(() => {
 		if (productData) {
 			setProducts(productData);
@@ -40,8 +42,8 @@ const ProductsManager = () => {
 	const image_host_Api = `https://api.imgbb.com/1/upload?key=${image_host_key}`;
 	const [isUploading, setIsUploading] = useState(false);
 
-	// Base API URL - should match your backend API
-	const API_BASE_URL = "/api/products"; // Adjust this to your API endpoint
+	
+	const API_BASE_URL = "/api/products";
 
 	useEffect(() => {
 		if (image_host_key) {
@@ -91,8 +93,8 @@ const ProductsManager = () => {
 
 	const getStatusColor = (inStock) => {
 		return inStock === true
-			? "bg-green-700 text-white"
-			: "bg-red-700 text-white";
+			? "bg-green-500 text-white"
+			: "bg-red-500 text-white";
 	};
 
 	const getStatusText = (inStock) => {
@@ -157,14 +159,14 @@ const ProductsManager = () => {
 		setEditingProduct({ ...editingProduct, images: updatedImages });
 	};
 
-	// Modified addNewImage function to use image host API instead of placeholder
+
 	const addNewImage = () => {
-		// Create a reference to a hidden file input
+		
 		const fileInput = document.createElement("input");
 		fileInput.type = "file";
 		fileInput.accept = "image/*";
 
-		// When file is selected, handle the upload
+
 		fileInput.onchange = async (e) => {
 			const file = e.target.files[0];
 			if (!file) return;
@@ -172,14 +174,14 @@ const ProductsManager = () => {
 			setIsUploading(true);
 
 			try {
-				// Upload the image
+				
 				const imageUrl = await uploadImage(file);
 				if (imageUrl) {
-					// Add the new image URL to the images array
+					
 					const updatedImages = [...editingProduct.images, imageUrl];
 					setEditingProduct({ ...editingProduct, images: updatedImages });
 
-					// Set current index to the new image
+				
 					setCurrentImageIndex(updatedImages.length - 1);
 				}
 			} catch (error) {
@@ -199,13 +201,12 @@ const ProductsManager = () => {
 		setEditingProduct({ ...editingProduct, images: updatedImages });
 	};
 
-	// API function to update a product
 	const updateProduct = async (productData) => {
 		setIsSubmitting(true);
 		setApiError(null);
 		console.log(typeof productData._id);
 		try {
-			// If product has an _id, update existing product
+		
 			if (productData._id && typeof productData._id === "string") {
 				const response = await axios.put(
 					`${API_BASE_URL}/${productData._id}`,
@@ -213,24 +214,23 @@ const ProductsManager = () => {
 				);
 
 				if (response.status === 200) {
-					
-					const updatedProducts = products.map(product => 
+					const updatedProducts = products.map((product) =>
 						product._id === productData._id ? response.data : product
 					);
 					setProducts(updatedProducts);
+					toast.success("Update product successfully");
 					return response.data;
 				}
 			} else {
-				
 				const response = await axios.post(API_BASE_URL, productData);
 
 				if (response.status === 201) {
-					
 					setProducts([...products, response.data]);
 					return response.data;
 				}
 			}
 		} catch (error) {
+			toast.error("Failed to update product");
 			console.error("Error updating product:", error);
 			setApiError(error.response?.data?.message || "Failed to update product");
 			throw error;
@@ -238,7 +238,6 @@ const ProductsManager = () => {
 			setIsSubmitting(false);
 		}
 	};
-
 
 	const deleteProduct = async (productId) => {
 		setIsSubmitting(true);
@@ -248,14 +247,18 @@ const ProductsManager = () => {
 			const response = await axios.delete(`${API_BASE_URL}/${productId}`);
 
 			if (response.status === 200) {
-			
-				const updatedProducts = products.filter(product => product._id !== productId);
+				const updatedProducts = products.filter(
+					(product) => product._id !== productId
+				);
 				setProducts(updatedProducts);
+				toast.success("Delete product successfully");
 				return response.data;
 			}
 		} catch (error) {
+			toast.error("Failed to delete product");
 			console.error("Error deleting product:", error);
 			setApiError(error.response?.data?.message || "Failed to delete product");
+
 			throw error;
 		} finally {
 			setIsSubmitting(false);
@@ -267,7 +270,6 @@ const ProductsManager = () => {
 			await updateProduct(editingProduct);
 			setEditingProduct(null);
 		} catch (error) {
-			
 			console.error("Failed to save changes:", error);
 		}
 	};
@@ -278,161 +280,137 @@ const ProductsManager = () => {
 			setShowDeleteModal(false);
 			setProductToDelete(null);
 		} catch (error) {
-			
 			console.error("Failed to delete product:", error);
 		}
 	};
 
 	const ProductsTable = () => (
-		<div className="rounded-md border border-gray-200">
-			<div className="overflow-x-auto">
-				<table className="">
-					<thead className="bg-gray-50">
-						<tr>
-							<th
-								scope="col"
-								className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-							>
-								Image
-							</th>
-							<th
-								scope="col"
-								className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-							>
-								<div className="flex items-center">
-									Product Name
-									<ArrowUpDown className="ml-2 h-4 w-4" />
-								</div>
-							</th>
-							<th
-								scope="col"
-								className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-							>
-								Category
-							</th>
-							<th
-								scope="col"
-								className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-							>
-								Price
-							</th>
-							<th
-								scope="col"
-								className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-							>
-								Stock
-							</th>
-							<th
-								scope="col"
-								className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-							>
-								Status
-							</th>
-							<th
-								scope="col"
-								className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-							>
-								Actions
-							</th>
-						</tr>
-					</thead>
-					<tbody className="bg-white divide-y divide-gray-200">
-						{filteredProducts && filteredProducts.length > 0 ? (
-							filteredProducts.map((product) => (
-								<tr key={product._id} className="hover:bg-gray-50">
-									<td className="px-6 py-4 whitespace-nowrap">
-										<img
-											src={product.images[0]}
-											alt={product.name}
-											className="h-10 w-10 rounded-md object-cover"
-										/>
-									</td>
-									<td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
-										{product.name}
-									</td>
-									<td className="px-6 py-4 whitespace-nowrap text-gray-500">
-										{product.category}
-									</td>
-									<td className="px-6 py-4 whitespace-nowrap text-right text-gray-500">
-										${product.price.toFixed(2)}
-									</td>
-									<td className="px-6 py-4 whitespace-nowrap text-right text-gray-500">
-										{product.stock}
-									</td>
-									<td className="px-6 py-4 whitespace-nowrap">
-										<span
-											className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-												product.inStock
-											)}`}
-										>
-											{getStatusText(product.inStock)}
-										</span>
-									</td>
-									<td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium relative">
-										<button
-											onClick={() => toggleDropdown(product._id)}
-											className="text-gray-400 hover:text-gray-500 focus:outline-none p-1 rounded-full"
-										>
-											<MoreHorizontal className="h-5 w-5" />
-										</button>
-										{dropdownOpen === product._id && (
-											<div className="absolute right-2 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
-												<div
-													className="py-1"
-													role="menu"
-													aria-orientation="vertical"
-												>
-													<div className="px-4 py-2 text-xs text-gray-500">
-														Actions
-													</div>
-													<div className="border-t border-gray-100"></div>
-													<button
-														onClick={() => handleViewClick(product)}
-														className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-														role="menuitem"
-													>
-														<Eye className="mr-2 h-4 w-4" />
-														View Details
-													</button>
-													<button
-														onClick={() => handleEditClick(product)}
-														className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-														role="menuitem"
-													>
-														<Edit className="mr-2 h-4 w-4" />
-														Edit Product
-													</button>
-													<button
-														onClick={() => handleDeleteClick(product)}
-														className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center"
-														role="menuitem"
-													>
-														<Trash className="mr-2 h-4 w-4" />
-														Delete Product
-													</button>
+		<div className="overflow-x-auto border border-gray-200 rounded-md">
+			<table className="w-full">
+				<thead className="bg-gray-50">
+					<tr>
+						<th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+							Image
+						</th>
+						<th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+							<div className="flex items-center">
+								<span className="whitespace-nowrap">Product Name</span>
+								<ArrowUpDown className="ml-2 h-4 w-4" />
+							</div>
+						</th>
+						<th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+							Category
+						</th>
+						<th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+							Price
+						</th>
+						<th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+							Stock
+						</th>
+						<th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+							Status
+						</th>
+						<th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+							<span className="sr-only">Actions</span>
+						</th>
+					</tr>
+				</thead>
+				<tbody className="bg-white divide-y divide-gray-200">
+					{filteredProducts && filteredProducts.length > 0 ? (
+						filteredProducts.map((product) => (
+							<tr key={product._id} className="hover:bg-gray-50">
+								<td className="px-4 py-4 whitespace-nowrap">
+									<img
+										src={product.images[0]}
+										alt={product.name}
+										className="h-10 w-10 rounded-md object-cover"
+									/>
+								</td>
+								<td className="px-4 py-4 whitespace-normal font-medium text-gray-900 max-w-xs">
+									<div className="truncate">{product.name}</div>
+								</td>
+								<td className="px-4 py-4 whitespace-nowrap text-gray-500">
+									{product.category}
+								</td>
+								<td className="px-4 py-4 whitespace-nowrap text-right text-gray-500">
+									${product.price.toFixed(2)}
+								</td>
+								<td className="px-4 py-4 whitespace-nowrap text-right text-gray-500">
+									{product.stock}
+								</td>
+								<td className="px-4 py-4 whitespace-nowrap">
+									<span
+										className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+											product.inStock
+										)}`}
+									>
+										{getStatusText(product.inStock)}
+									</span>
+								</td>
+								<td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium relative">
+									<button
+										onClick={() => toggleDropdown(product._id)}
+										className="text-gray-400 hover:text-gray-500 focus:outline-none p-1 rounded-full"
+									>
+										<MoreHorizontal className="h-5 w-5" />
+									</button>
+									{dropdownOpen === product._id && (
+										<div className="absolute right-2 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+											<div
+												className="py-1"
+												role="menu"
+												aria-orientation="vertical"
+											>
+												<div className="px-4 py-2 text-xs text-gray-500">
+													Actions
 												</div>
+												<div className="border-t border-gray-100"></div>
+												<button
+													onClick={() => handleViewClick(product)}
+													className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+													role="menuitem"
+												>
+													<Eye className="mr-2 h-4 w-4" />
+													View Details
+												</button>
+												<button
+													onClick={() => handleEditClick(product)}
+													className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+													role="menuitem"
+												>
+													<Edit className="mr-2 h-4 w-4" />
+													Edit Product
+												</button>
+												<button
+													onClick={() => handleDeleteClick(product)}
+													className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center"
+													role="menuitem"
+												>
+													<Trash className="mr-2 h-4 w-4" />
+													Delete Product
+												</button>
 											</div>
-										)}
-									</td>
-								</tr>
-							))
-						) : (
-							<tr>
-								<td colSpan={7} className="text-center py-6 text-gray-500">
-									No products found. Try adjusting your search.
+										</div>
+									)}
 								</td>
 							</tr>
-						)}
-					</tbody>
-				</table>
-			</div>
+						))
+					) : (
+						<tr>
+							<td colSpan={7} className="text-center py-6 text-gray-500">
+								No products found. Try adjusting your search.
+							</td>
+						</tr>
+					)}
+				</tbody>
+			</table>
 		</div>
 	);
 
 	// State for current image index moved outside the EditProductForm component
 	const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-	const EditProductForm = ({uploadImage}) => {
+	const EditProductForm = ({ uploadImage }) => {
 		const [isUploading, setIsUploading] = useState(false);
 		const [showImageLinkInput, setShowImageLinkInput] = useState(false);
 		const [imageLink, setImageLink] = useState("");
@@ -542,7 +520,7 @@ const ProductsManager = () => {
 							</div>
 						)}
 
-						{/* Image controls */}
+					
 						<div className="mt-4 space-y-2">
 							{/* Image Link Input */}
 							{showImageLinkInput && (
@@ -935,30 +913,11 @@ const ProductsManager = () => {
 											onChange={(e) => setSearchTerm(e.target.value)}
 										/>
 									</div>
-									<button
-										onClick={() =>
-											handleEditClick({
-												_id:
-													products.length > 0
-														? (
-																Math.max(
-																	...products.map((p) => parseInt(p._id) || 0)
-																) + 1
-														  ).toString()
-														: "1",
-												name: "",
-												price: 0,
-												category: "",
-												stock: 0,
-												inStock: true,
-												description: "",
-												images: ["/api/placeholder/200/200"],
-											})
-										}
-										className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-									>
-										Add Product
-									</button>
+									<Link href="/dashboard/vendor/product">
+										<button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+											Add Product
+										</button>
+									</Link>
 								</div>
 							</div>
 							<ProductsTable />
