@@ -9,7 +9,7 @@ import useProduct from "@/hooks/useProduct";
 
 export default function Feature() {
   const [products, loading, error] = useProduct();
-  console.log(products);
+ 
   
   return (
     <section className="container mx-auto py-12">

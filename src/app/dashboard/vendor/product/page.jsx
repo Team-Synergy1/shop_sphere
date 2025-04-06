@@ -39,12 +39,16 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 // Form schema
 const productSchema = z.object({
 	name: z
 		.string()
 		.min(3, { message: "Product name must be at least 3 characters" }),
+	brand: z
+		.string()
+		.min(2, { message: "Brand name must be at least 2 characters" }),
 	category: z.string({ message: "Please select a category" }),
 	subcategory: z.string().optional(),
 	price: z.coerce
@@ -59,6 +63,7 @@ const productSchema = z.object({
 	inStock: z.boolean().default(true),
 	shipping: z.string().optional(),
 	delivery: z.string().optional(),
+	vendor: z.string().optional(),
 });
 
 export default function AddProductPage() {
@@ -153,6 +158,7 @@ export default function AddProductPage() {
 		resolver: zodResolver(productSchema),
 		defaultValues: {
 			name: "",
+			brand: "",
 			category: "",
 			subcategory: "",
 			price: 0,
@@ -279,17 +285,18 @@ export default function AddProductPage() {
 	// form submission
 	const onSubmit = async (data) => {
 		try {
-			const formattedSpecs = Object.entries(specs).map(([key, value]) => `${key}: ${value}`
+			const formattedSpecs = Object.entries(specs).map(
+				([key, value]) => `${key}: ${value}`
 			);
 
 			const productData = {
 				...data,
 				colors,
 				features,
-				specs: formattedSpecs, // This will be an array of strings like ["key1: value1", "key2: value2"]
+				specs: formattedSpecs,
 				images,
 			};
-
+			console.log(productData);
 			const response = await fetch("/api/products", {
 				method: "POST",
 				headers: {
@@ -305,10 +312,22 @@ export default function AddProductPage() {
 			const result = await response.json();
 			console.log("product created:", result);
 
-			alert("Product created successfully!");
+			// Reset form and related states
+			form.reset(); // Reset form values to default
+			setColors([]); // Clear colors
+			setFeatures([]); // Clear features
+			setSpecs({}); // Clear specs
+			setImages([]); // Clear images
+			setNewColor(""); // Reset new color input
+			setNewFeature(""); // Reset new feature input
+			setNewSpecKey(""); // Reset new spec key input
+			setNewSpecValue(""); // Reset new spec value input
+			setActiveTab("basic"); // Reset to basic tab
+
+			toast.success("Product created successfully");
 		} catch (error) {
 			console.error("Error creating product:", error);
-			alert("Failed to create product: " + error.message);
+			toast.error("Failed to create product: " + error.message);
 		}
 	};
 	return (
@@ -374,6 +393,25 @@ export default function AddProductPage() {
 									/>
 
 									<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+										<FormField
+											control={form.control}
+											name="brand"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Brand</FormLabel>
+													<FormControl>
+														<Input
+															placeholder="Apple, Samsung, Sony"
+															{...field}
+														/>
+													</FormControl>
+													<FormDescription>
+														The manufacturer or brand of the product
+													</FormDescription>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
 										<FormField
 											control={form.control}
 											name="category"

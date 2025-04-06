@@ -1,14 +1,29 @@
 import { connectDB } from "@/lib/db";
 import Product from "@/models/Product";
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "../auth/[...nextauth]/route";
+
 
 export async function POST(req) {
 	try {
+		
 		await connectDB();
 
-		const body = await req.json();
+		
+		const session = await getServerSession(authOptions);
 
-		const { name, category, price, stock } = body;
+	
+		if (!session || !session.user) {
+			return NextResponse.json(
+				{ message: "Unauthorized. Please log in." },
+				{ status: 401 }
+			);
+		}
+
+		const body = await req.json();
+		console.log("Received body:", body);
+
 		if (Array.isArray(body.specs)) {
 			const specsObject = {};
 			body.specs.forEach((spec) => {
@@ -20,6 +35,7 @@ export async function POST(req) {
 			body.specs = specsObject;
 		}
 
+		const { name, category, price, stock } = body;
 		if (!name || !category || price === undefined || stock === undefined) {
 			return NextResponse.json(
 				{ message: "Missing required fields" },
@@ -27,8 +43,14 @@ export async function POST(req) {
 			);
 		}
 
-		const product = new Product(body);
+		const productData = {
+			...body,
+			v_id: session.user.id,
+		};
+	
+		const product = new Product(productData);
 
+	
 		const savedProduct = await product.save();
 		console.log("Product saved successfully:", savedProduct._id);
 
@@ -40,7 +62,11 @@ export async function POST(req) {
 		console.error("Error saving product:", error.name, error.message);
 		console.error(error.stack);
 		return NextResponse.json(
-			{ message: "Error saving product", error: error.message },
+			{
+				message: "Error saving product",
+				error: error.message,
+				stack: error.stack,
+			},
 			{ status: 500 }
 		);
 	}
@@ -51,7 +77,7 @@ export async function GET() {
 		await connectDB();
 
 		const products = await Product.find({});
-		return NextResponse.json(products); 
+		return NextResponse.json(products);
 	} catch (error) {
 		console.error("Error retrieving products:", error.message);
 		return NextResponse.json(
@@ -60,4 +86,5 @@ export async function GET() {
 		);
 	}
 }
+
 

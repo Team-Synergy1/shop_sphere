@@ -139,7 +139,7 @@ export default function DashboardLayout({ children }) {
 				label: "Dashboard",
 			},
 			{
-				href: "/dashboard/vendor/products",
+				href: "/dashboard/vendor/allProduct",
 				icon: <Package className="h-5 w-5" />,
 				label: "Products",
 			},
@@ -250,7 +250,6 @@ export default function DashboardLayout({ children }) {
 									<SheetTitle className="text-2xl text-orange-500">
 										ShopSphere
 									</SheetTitle>
-									
 								</Link>
 							</SheetHeader>
 
@@ -276,7 +275,6 @@ export default function DashboardLayout({ children }) {
 					<div className="flex p-4 items-center">
 						<Link href="/" className=" font-semibold">
 							<h3 className="text-xl ">ShopSphere</h3>
-							
 						</Link>
 					</div>
 					<nav className="flex flex-col gap-2 p-4">
