@@ -1,6 +1,7 @@
 import Banner from "@/components/Home/banner";
 import Categories from "@/components/Home/Categories";
 import Discount from "@/components/Home/Discount";
+import EidCountdownTimer from "@/components/Home/EidCountdownTimer";
 import Feature from "@/components/Home/feature";
 import { JustForYou } from "@/components/Home/just";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ export default function Home() {
 			<div className="container mx-auto px-4">
 				<Banner></Banner>
         <Categories></Categories>
+				<EidCountdownTimer />
         <JustForYou></JustForYou>
         <Feature></Feature>
         <Discount></Discount>
