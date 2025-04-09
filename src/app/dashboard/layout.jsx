@@ -109,19 +109,19 @@ export default function DashboardLayout({ children }) {
 	];
 	let title = "My Account";
 
-	// useEffect(() => {
-	// 	if (status === "loading") return;
+	useEffect(() => {
+		if (status === "loading") return;
 
-	// 	if (!session) {
-	// 		router.push("/login");
-	// 	} else if (session.user.role === "admin") {
-	// 		router.push("/dashboard/admin");
-	// 	} else if (session.user.role === "vendor") {
-	// 		router.push("/dashboard/vendor");
-	// 	} else if (session.user.role === "user") {
-	// 		router.push("/dashboard/user");
-	// 	}
-	// }, [session, status, router]);
+		if (!session) {
+			router.push("/login");
+		} else if (session.user.role === "admin") {
+			router.push("/dashboard/admin");
+		} else if (session.user.role === "vendor") {
+			router.push("/dashboard/vendor");
+		} else if (session.user.role === "user") {
+			router.push("/dashboard/user");
+		}
+	}, [session, status, router]);
 
 	if (status === "loading") {
 		return (

@@ -29,6 +29,16 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  loginAttempts: {
+    type: Number,
+    default: 0,
+  },
+  lockUntil: {
+    type: Date,
+    default: null
+  },
+  resetPasswordToken: String,
+  resetPasswordExpire: Date,
   createdAt: {
     type: Date,
     default: Date.now,

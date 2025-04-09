@@ -30,14 +30,35 @@ export const authOptions = {
 					throw new Error("No user found with this email");
 				}
 
+				// Check if account is locked
+				if (user.lockUntil && new Date(user.lockUntil).getTime() > Date.now()) {
+					throw new Error("Account locked. Try again later.");
+				}
+
 				const isPasswordMatch = await bcrypt.compare(
 					credentials.password,
 					user.password
 				);
 
 				if (!isPasswordMatch) {
+					user.loginAttempts = (user.loginAttempts || 0) + 1;
+
+					// Lock the account for 1 hour after 3 failed attempts
+					if (user.loginAttempts >= 3) {
+						user.lockUntil = new Date(Date.now() + 60 * 60 * 1000);
+						await user.save();
+						throw new Error("Too many failed attempts. Account is temporarily locked.");
+					}
+
+					await user.save();
 					throw new Error("Invalid credentials");
 				}
+
+				// Successful login: reset counters
+				user.loginAttempts = 0;
+				user.lockUntil = null;
+				await user.save();
+
 
 				return {
 					id: user._id.toString(),
