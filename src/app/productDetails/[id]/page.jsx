@@ -1,7 +1,7 @@
 // app/products/[id]/page.jsx
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
 	ChevronLeft,
 	Heart,
@@ -18,15 +18,70 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import useProduct from "@/hooks/useProduct";
+
 import AddToCart from "@/components/share/addToCart";
 
-export default function ProductPage({ params }) {
+import { useWishlist } from "@/context/WishlistContext";
+import axios from "axios";
+import { useSession } from "next-auth/react";
+import { useParams } from "next/navigation";
+
+export default function ProductPage() {
+	const { data: session } = useSession();
+	const params = useParams();
+	const { isInWishlist, toggleWishlistItem, isLoading: wishlistLoading } = useWishlist();
+
 	const [products] = useProduct();
 	const product = products?.find((p) => p._id == params.id);
 
 	const [selectedColor, setSelectedColor] = useState();
 	const [quantity, setQuantity] = useState(1);
 	const [activeImage, setActiveImage] = useState(0);
+
+	const [inWishlist, setInWishlist] = useState(false);
+	const [checkingWishlist, setCheckingWishlist] = useState(true);
+
+	// Check if product is in wishlist on page load
+	useEffect(() => {
+		if (!product || !session) {
+			setCheckingWishlist(false);
+			return;
+		}
+
+		const checkWishlistStatus = async () => {
+			try {
+				setCheckingWishlist(true);
+				const { data } = await axios.post("/api/user/wishlist/check", {
+					productId: product._id
+				});
+				setInWishlist(data.inWishlist);
+			} catch (error) {
+				console.error("Error checking wishlist status:", error);
+			} finally {
+				setCheckingWishlist(false);
+			}
+		};
+
+		checkWishlistStatus();
+	}, [product, session]);
+
+	// Alternative: Use the context to check wishlist status
+	useEffect(() => {
+		if (product) {
+			setInWishlist(isInWishlist(product._id));
+		}
+	}, [product, isInWishlist]);
+
+	const handleWishlistToggle = async () => {
+		if (!product) return;
+
+		const result = await toggleWishlistItem(product._id);
+		setInWishlist(result);
+	};
+
+	if (!product) {
+		return <div className="container mx-auto px-4 py-8">Loading...</div>;
+	}
 
 	return (
 		<div className="container mx-auto px-4 py-8">
@@ -53,9 +108,8 @@ export default function ProductPage({ params }) {
 						{product.images.map((image, index) => (
 							<div
 								key={index}
-								className={`cursor-pointer border-2 rounded ${
-									index === activeImage ? "border-blue-500" : "border-gray-200"
-								}`}
+								className={`cursor-pointer border-2 rounded ${index === activeImage ? "border-blue-500" : "border-gray-200"
+									}`}
 								onClick={() => setActiveImage(index)}
 							>
 								<img
@@ -72,8 +126,18 @@ export default function ProductPage({ params }) {
 					<div className="flex justify-between">
 						<h1 className="text-3xl font-bold">{product.name}</h1>
 						<div className="flex space-x-2">
-							<Button variant="outline" size="icon">
-								<Heart className="h-5 w-5" />
+							<Button
+								variant="outline"
+								size="icon"
+								onClick={handleWishlistToggle}
+								disabled={wishlistLoading || checkingWishlist}
+								className={inWishlist ? "bg-pink-50" : ""}
+							>
+								<Heart
+									className="h-5 w-5"
+									fill={inWishlist ? "#ec4899" : "none"}
+									stroke={inWishlist ? "#ec4899" : "currentColor"}
+								/>
 							</Button>
 							<Button variant="outline" size="icon">
 								<Share className="h-5 w-5" />
