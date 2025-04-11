@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -14,44 +15,41 @@ import Loader from "@/app/loading";
 import ProductGrid from "@/components/share/ProductGrid";
 import ProductFilters from "@/components/share/ProductFilters";
 
-
-// Mock product data for fallback and testing
+// Mock data for fallback and testing
 const MOCK_PRODUCTS = [
   {
     id: "67e2f4650f4ba2097e64e3ea",
-    name: "Smartphone X",
-    price: 599.99,
-    category: "Electronics",
-    brand: "TechBrand",
+    name: "Hit Anti Roach Gel",
+    brand: "Godrej Consumer Products Ltd.",
+    category: "home",
+    price: 217,
     rating: 4.5,
     image: "/api/placeholder/300/300",
-    inStock: true,
   },
   // ... other mock products
 ];
 
-export default function ProductListingPage() {
-  // State management
+export default function CategoryPage() {
+  const { slug } = useParams();
   const [products, setProducts] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategories, setSelectedCategories] = useState([]);
-  const [selectedBrands, setSelectedBrands] = useState([]);
-  const [priceRange, setPriceRange] = useState([0, 10000]);
-  const [sortBy, setSortBy] = useState("relevance");
-  const [inStockOnly, setInStockOnly] = useState(false);
   const [viewMode, setViewMode] = useState("grid");
+  const [priceRange, setPriceRange] = useState([0, 10000]);
+  const [sortBy, setSortBy] = useState("featured");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  
+  // Filter states
   const [availableBrands, setAvailableBrands] = useState([]);
-  const [availableCategories, setAvailableCategories] = useState([]);
+  const [selectedBrands, setSelectedBrands] = useState([]);
+  const [selectedRatings, setSelectedRatings] = useState([]);
+  const [inStockOnly, setInStockOnly] = useState(false);
 
-  // Fetch products from API
   useEffect(() => {
-    async function fetchProducts() {
+    async function fetchProductsByCategory() {
       setLoading(true);
       try {
-        const response = await fetch("/api/products");
+        const response = await fetch(`/api/products/category/${slug}`);
 
         if (!response.ok) {
           throw new Error(`Error: ${response.status}`);
@@ -68,120 +66,91 @@ export default function ProductListingPage() {
           console.warn("Unexpected data format, using mock data");
           productArray = MOCK_PRODUCTS;
         }
-
+        
         setProducts(productArray);
-
-        // Extract unique brands and categories from products
-        const uniqueBrands = [
-          ...new Set(
-            productArray.map((product) => product.brand).filter(Boolean)
-          ),
-        ];
+        
+        // Extract unique brands from products
+        const uniqueBrands = [...new Set(productArray
+          .map(product => product.brand)
+          .filter(Boolean))];
         setAvailableBrands(uniqueBrands);
-
-        const uniqueCategories = [
-          ...new Set(
-            productArray.map((product) => product.category).filter(Boolean)
-          ),
-        ];
-        setAvailableCategories(uniqueCategories);
 
         setError(null);
       } catch (err) {
         console.error("Failed to fetch products:", err);
         setError("Failed to load products.");
         setProducts(MOCK_PRODUCTS);
-
-        // Set available brands and categories from mock data
-        const uniqueBrands = [
-          ...new Set(
-            MOCK_PRODUCTS.map((product) => product.brand).filter(Boolean)
-          ),
-        ];
+        
+        // Set available brands from mock data
+        const uniqueBrands = [...new Set(MOCK_PRODUCTS
+          .map(product => product.brand)
+          .filter(Boolean))];
         setAvailableBrands(uniqueBrands);
-
-        const uniqueCategories = [
-          ...new Set(
-            MOCK_PRODUCTS.map((product) => product.category).filter(Boolean)
-          ),
-        ];
-        setAvailableCategories(uniqueCategories);
       } finally {
         setLoading(false);
       }
     }
 
-    fetchProducts();
-  }, []);
+    fetchProductsByCategory();
+  }, [slug]);
 
-  // Handler functions for ProductFilters
-  const handleCategoryChange = (category) => {
-    setSelectedCategories((prev) =>
-      prev.includes(category)
-        ? prev.filter((c) => c !== category)
-        : [...prev, category]
-    );
-  };
-
+  // Handler functions
   const handleBrandChange = (brand) => {
-    setSelectedBrands((prev) =>
-      prev.includes(brand) ? prev.filter((b) => b !== brand) : [...prev, brand]
-    );
+    setSelectedBrands(prev => {
+      if (prev.includes(brand)) {
+        return prev.filter(b => b !== brand);
+      } else {
+        return [...prev, brand];
+      }
+    });
   };
-
-  // Filtering and sorting logic
+  
+  const handleRatingChange = (rating) => {
+    setSelectedRatings(prev => {
+      if (prev.includes(rating)) {
+        return prev.filter(r => r !== rating);
+      } else {
+        return [...prev, rating];
+      }
+    });
+  };
+  
+  // Filter and sort products
   const filteredProducts = useMemo(() => {
-    return products
-      .filter((product) => {
-        if (!product || !product.name || typeof product.price !== "number") {
+    return products.filter((product) => {
+      if (!product || typeof product.price !== "number") {
+        return false;
+      }
+      
+      // Price filter
+      const priceMatch = product.price >= priceRange[0] && product.price <= priceRange[1];
+      
+      // Brand filter (if no brands selected, show all)
+      const brandMatch = selectedBrands.length === 0 || selectedBrands.includes(product.brand);
+      
+      // Rating filter (if no ratings selected, show all)
+      const ratingMatch = selectedRatings.length === 0 || 
+        selectedRatings.some(rating => {
+          if (rating === 5) return product.rating === 5;
+          if (rating === 4) return product.rating >= 4;
+          if (rating === 3) return product.rating >= 3;
           return false;
-        }
-
-        const matchesSearch = product.name
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase());
-        const matchesCategories =
-          selectedCategories.length === 0 ||
-          selectedCategories.includes(product.category);
-        const matchesBrands =
-          selectedBrands.length === 0 || selectedBrands.includes(product.brand);
-        const matchesPriceRange =
-          product.price >= priceRange[0] && product.price <= priceRange[1];
-        const matchesStockFilter = !inStockOnly || product.inStock !== false;
-
-        return (
-          matchesSearch &&
-          matchesCategories &&
-          matchesBrands &&
-          matchesPriceRange &&
-          matchesStockFilter
-        );
-      })
-      .sort((a, b) => {
-        switch (sortBy) {
-          case "priceAsc":
-            return a.price - b.price;
-          case "priceDesc":
-            return b.price - a.price;
-          case "rating":
-            return b.rating - a.rating;
-          default:
-            return 0;
-        }
-      });
-  }, [
-    products,
-    searchTerm,
-    selectedCategories,
-    selectedBrands,
-    priceRange,
-    sortBy,
-    inStockOnly,
-  ]);
+        });
+      
+      // Stock filter
+      const stockMatch = !inStockOnly || product.inStock !== false;
+      
+      return priceMatch && brandMatch && ratingMatch && stockMatch;
+    }).sort((a, b) => {
+      if (sortBy === "price-low") return a.price - b.price;
+      if (sortBy === "price-high") return b.price - a.price;
+      return 0; // featured or default
+    });
+  }, [products, priceRange, selectedBrands, selectedRatings, inStockOnly, sortBy]);
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6">All Products</h1>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6 capitalize">{slug} Products</h1>
 
       {error && <p className="text-center py-4 text-red-500">{error}</p>}
 
@@ -206,10 +175,9 @@ export default function ProductListingPage() {
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="relevance">Relevance</SelectItem>
-              <SelectItem value="priceAsc">Price: Low to High</SelectItem>
-              <SelectItem value="priceDesc">Price: High to Low</SelectItem>
-              <SelectItem value="rating">Top Rated</SelectItem>
+              <SelectItem value="featured">Featured</SelectItem>
+              <SelectItem value="price-low">Price: Low to High</SelectItem>
+              <SelectItem value="price-high">Price: High to Low</SelectItem>
             </SelectContent>
           </Select>
 
@@ -233,31 +201,34 @@ export default function ProductListingPage() {
       </div>
 
       <div className="flex flex-col md:flex-row gap-6">
-        {/* Sidebar Filters */}
+        {/* Filters Sidebar */}
         <div
           className={`w-full md:w-64 md:block ${
             mobileFiltersOpen ? "block" : "hidden"
           }`}
         >
           <ProductFilters
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
+            searchTerm=""
+            onSearchChange={() => {}}
             priceRange={priceRange}
             onPriceChange={setPriceRange}
-            availableCategories={availableCategories}
-            selectedCategories={selectedCategories}
-            onCategoryChange={handleCategoryChange}
+            availableCategories={[]}
+            selectedCategories={[]}
+            onCategoryChange={() => {}}
             availableBrands={availableBrands}
             selectedBrands={selectedBrands}
             onBrandChange={handleBrandChange}
             inStockOnly={inStockOnly}
             onStockChange={() => setInStockOnly(!inStockOnly)}
-            showSearch={true}
-            showCategories={true}
+            selectedRatings={selectedRatings}
+            onRatingChange={handleRatingChange}
+            showSearch={false}
+            showCategories={false}
+            showRatings={true}
           />
         </div>
 
-        {/* Product Grid/List */}
+        {/* Product Grid */}
         <div className="flex-1">
           {loading ? (
             <Loader />

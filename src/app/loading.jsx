@@ -3,7 +3,7 @@
  * @see https://v0.dev/t/Z1bVbMZYEOI
  * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
  */
-export default function Component() {
+export default function Loader() {
 	return (
 		<div className="flex items-center justify-center min-h-screen">
 			<svg

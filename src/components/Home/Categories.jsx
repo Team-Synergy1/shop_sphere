@@ -5,9 +5,9 @@ import Link from 'next/link';
 const categories = [
   { id: 1, name: "Electronics", icon: "🖥️", slug: "electronics" },
   { id: 2, name: "Fashion", icon: "👕", slug: "fashion" },
-  { id: 3, name: "Home & Living", icon: "🏠", slug: "home-living" },
-  { id: 4, name: "Health & Beauty", icon: "💄", slug: "health-beauty" },
-  { id: 5, name: "Sports & Outdoors", icon: "⚽", slug: "sports-outdoors" },
+  { id: 3, name: "Home", icon: "🏠", slug: "home" },
+  { id: 4, name: "Beauty", icon: "💄", slug: "beauty" },
+  { id: 5, name: "Sports", icon: "⚽", slug: "sports" },
   { id: 6, name: "Baby & Toys", icon: "🎮", slug: "baby-toys" },
   { id: 7, name: "Groceries", icon: "🛒", slug: "groceries" },
   { id: 8, name: "Books", icon: "📚", slug: "books" },
