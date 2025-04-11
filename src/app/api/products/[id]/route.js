@@ -3,6 +3,7 @@ import Product from "@/models/Product";
 import { NextResponse } from "next/server";
 
 
+
 export async function PUT(req, {params}) {
     try {
         await connectDB();

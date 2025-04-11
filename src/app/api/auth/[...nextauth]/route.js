@@ -47,7 +47,9 @@ export const authOptions = {
 					if (user.loginAttempts >= 3) {
 						user.lockUntil = new Date(Date.now() + 60 * 60 * 1000);
 						await user.save();
-						throw new Error("Too many failed attempts. Account is temporarily locked.");
+						throw new Error(
+							"Too many failed attempts. Account is temporarily locked."
+						);
 					}
 
 					await user.save();
@@ -58,7 +60,6 @@ export const authOptions = {
 				user.loginAttempts = 0;
 				user.lockUntil = null;
 				await user.save();
-
 
 				return {
 					id: user._id.toString(),
