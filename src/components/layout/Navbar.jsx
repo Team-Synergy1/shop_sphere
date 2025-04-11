@@ -40,7 +40,7 @@ import { Separator } from "../ui/separator";
 import { usePathname } from "next/navigation";
 
 const categories = [
-	{ name: "AllProducts", url: "/products" },
+	{ name: "Products", url: "/products" },
 	{ name: "Electronics", url: "/category/electronics" },
 	{ name: "Fashion", url: "/category/fashion" },
 	{ name: "Home", url: "/category/home" },
@@ -266,7 +266,7 @@ export default function Navbar() {
 									<div className="relative">
 										<Bell size={24} />
 										<span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-											2
+											
 										</span>
 									</div>
 									<span className="text-xs hidden md:inline-block">

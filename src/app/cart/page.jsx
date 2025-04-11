@@ -226,7 +226,7 @@ export default function CartPage() {
 										{/* Item subtotal */}
 										<div className="mt-2 text-right">
 											<p className="text-sm text-gray-500">
-												Subtotal: ₹{((item.price || 0) * (item.quantity || 1)).toFixed(2)}
+												Subtotal: BDT.{((item.price || 0) * (item.quantity || 1)).toFixed(2)}
 											</p>
 										</div>
 									</div>
