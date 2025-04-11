@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
 	Search,
@@ -40,27 +40,91 @@ import { Separator } from "../ui/separator";
 import { usePathname } from "next/navigation";
 
 const categories = [
+	{ name: "AllProducts", url: "/products" },
 	{ name: "Electronics", url: "/category/electronics" },
 	{ name: "Fashion", url: "/category/fashion" },
-	{ name: "Home & Living", url: "/category/home-living" },
-	{ name: "Health & Beauty", url: "/category/health-beauty" },
+	{ name: "Home", url: "/category/home" },
+	{ name: "Beauty", url: "/category/beauty" },
 	{ name: "Baby & Toys", url: "/category/baby-toys" },
 	{ name: "Groceries", url: "/category/groceries" },
-	{ name: "Sports & Outdoors", url: "/category/sports-outdoors" },
+	{ name: "Sports & Outdoors", url: "/category/sports" },
 	{ name: "Automotive", url: "/category/automotive" },
 ];
 
+const useCartCount = () => {
+	const { data: session } = useSession();
+	const [cartItemCount, setCartItemCount] = useState(0);
+
+	const fetchCartItems = async () => {
+		try {
+			if (session?.user) {
+				const response = await fetch("/api/addCart");
+				const data = await response.json();
+
+				setCartItemCount(data?.cart?.length || 0);
+			}
+		} catch (error) {
+			console.error("Failed to fetch cart items:", error);
+
+			setCartItemCount(0);
+		}
+	};
+
+	useEffect(() => {
+		// Initial fetch
+		fetchCartItems();
+
+		const intervalId = setInterval(fetchCartItems, 5000);
+
+		const handleStorageChange = (event) => {
+			if (event.key === "shopSphereCart") {
+				try {
+					if (event.newValue) {
+						const newCart = JSON.parse(event.newValue);
+						setCartItemCount(newCart?.cart?.length || 0);
+					} else {
+						setCartItemCount(0);
+					}
+				} catch (e) {
+					console.error("Error parsing cart data:", e);
+					setCartItemCount(0);
+				}
+			}
+		};
+
+		const handleCartUpdate = (event) => {
+			if (event.detail && event.detail.cartItems) {
+				setCartItemCount(event.detail.cartItems.length || 0);
+			} else {
+				fetchCartItems();
+			}
+		};
+
+		if (typeof window !== "undefined") {
+			window.addEventListener("storage", handleStorageChange);
+			window.addEventListener("cartUpdated", handleCartUpdate);
+		}
+
+		return () => {
+			clearInterval(intervalId);
+			if (typeof window !== "undefined") {
+				window.removeEventListener("storage", handleStorageChange);
+				window.removeEventListener("cartUpdated", handleCartUpdate);
+			}
+		};
+	}, [session]);
+
+	return { cartItemCount, refreshCart: fetchCartItems };
+};
+
 export default function Navbar() {
 	const { data: session } = useSession();
-
+	const { cartItemCount, refreshCart } = useCartCount();
+	const pathName = usePathname();
 
 	const handleLogout = () => {
 		signOut({ callbackUrl: "/" });
 	};
-
-	// test case
-
-	const pathName = usePathname();
 
 	if (!pathName.includes("dashboard")) {
 		return (
@@ -171,12 +235,15 @@ export default function Navbar() {
 							<Link
 								href="/cart"
 								className="flex flex-col items-center p-1 text-gray-700 hover:text-orange-500"
+								onClick={() => refreshCart()} // Refresh cart count when navigating to cart
 							>
 								<div className="relative">
 									<ShoppingCart size={24} />
-									<span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-										3
-									</span>
+									{cartItemCount > 0 && (
+										<span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+											{cartItemCount > 99 ? "99+" : cartItemCount}
+										</span>
+									)}
 								</div>
 								<span className="text-xs hidden md:inline-block">Cart</span>
 							</Link>
