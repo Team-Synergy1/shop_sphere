@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import Link from 'next/link';
 
 const bannerImages = [
   {
@@ -30,28 +31,28 @@ const bannerImages = [
 
 export default function Banner() {
   const [currentSlide, setCurrentSlide] = useState(0);
- 
+
   // Auto slide functionality
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev === bannerImages.length - 1 ? 0 : prev + 1));
     }, 5000);
-   
+
     return () => clearInterval(interval);
   }, []);
- 
+
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev === bannerImages.length - 1 ? 0 : prev + 1));
   };
- 
+
   const prevSlide = () => {
     setCurrentSlide((prev) => (prev === 0 ? bannerImages.length - 1 : prev - 1));
   };
- 
+
   const goToSlide = (index) => {
     setCurrentSlide(index);
   };
- 
+
   return (
     <div className="relative w-full h-96 overflow-hidden rounded-lg shadow-lg my-4">
       {/* Main banner container */}
@@ -66,22 +67,24 @@ export default function Banner() {
               className="w-full h-full bg-cover bg-center"
               style={{ backgroundImage: `url(${banner.imageUrl})` }}
             />
-           
+
             {/* Banner content */}
             <div className="absolute inset-0 flex flex-col justify-center items-start p-12 bg-gradient-to-r from-black/70 to-transparent">
               <h2 className="text-4xl font-bold text-white mb-2">{banner.title}</h2>
               <p className="text-xl text-white mb-6">{banner.description}</p>
-              <Button
-                variant="default"
-                className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2"
-              >
-                Shop Now
-              </Button>
+              <Link href={`/products`}>
+                <Button
+                  variant="default"
+                  className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2"
+                >
+                  Shop Now
+                </Button>
+              </Link>
             </div>
           </div>
         ))}
       </div>
-     
+
       {/* Navigation buttons */}
       <Button
         variant="outline"
@@ -91,7 +94,7 @@ export default function Banner() {
       >
         <ChevronLeft className="h-6 w-6" />
       </Button>
-     
+
       <Button
         variant="outline"
         size="icon"
@@ -100,16 +103,15 @@ export default function Banner() {
       >
         <ChevronRight className="h-6 w-6" />
       </Button>
-     
+
       {/* Indicator dots */}
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
         {bannerImages.map((_, index) => (
           <button
             key={index}
             onClick={() => goToSlide(index)}
-            className={`h-2 w-8 rounded-full transition-colors ${
-              index === currentSlide ? "bg-orange-500" : "bg-white/50"
-            }`}
+            className={`h-2 w-8 rounded-full transition-colors ${index === currentSlide ? "bg-orange-500" : "bg-white/50"
+              }`}
           />
         ))}
       </div>
