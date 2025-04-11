@@ -146,8 +146,8 @@ export default function VendorDashboard() {
         </Card>
       </div>
 
-      <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="lg:col-span-4">
+      <div className="mt-6 grid gap-4 md:grid-cols-7 lg:grid-cols-7">
+        <Card className="md:col-span-3 lg:col-span-4">
           <CardHeader>
             <CardTitle>Sales Overview</CardTitle>
             <CardDescription>Your store's sales performance over time</CardDescription>
@@ -172,7 +172,7 @@ export default function VendorDashboard() {
             </ResponsiveContainer>
           </CardContent>
         </Card>
-        <Card className="lg:col-span-3">
+        <Card className="md:col-span-4 lg:col-span-3">
           <CardHeader>
             <CardTitle>Recent Orders</CardTitle>
             <CardDescription>Latest incoming orders for your store</CardDescription>
@@ -274,8 +274,8 @@ export default function VendorDashboard() {
         </CardContent>
       </Card>
 
-      <div className="mt-6 grid gap-4 md:grid-cols-3">
-        <Card>
+      <div className="mt-6 grid gap-4 md:grid-cols-10">
+        <Card className="md:col-span-3">
           <CardHeader>
             <CardTitle>Order Fulfillment</CardTitle>
             <CardDescription>Order processing efficiency</CardDescription>
@@ -314,7 +314,7 @@ export default function VendorDashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="md:col-span-3">
           <CardHeader>
             <CardTitle>Inventory Status</CardTitle>
             <CardDescription>Current stock levels</CardDescription>
@@ -351,7 +351,7 @@ export default function VendorDashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="md:col-span-4">
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
             <CardDescription>Common tasks for your store</CardDescription>
