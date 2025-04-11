@@ -9,6 +9,7 @@ import Footer from "@/components/layout/Footer";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { WishlistProvider } from "@/context/WishlistContext";
 
 const geistSans = Geist({
 	variable: "--font-geist-sans",
@@ -38,20 +39,20 @@ export default function RootLayout({ children }) {
 				/>
 			</head>
 			<AuthProvider>
-			<body
-				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-			>
-				
-					<QueryClientProvider client={queryClient}>
-						<Navbar />
-       
+				<body
+					className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+				>
+					<WishlistProvider>
+						<QueryClientProvider client={queryClient}>
+							<Navbar />
 
-						{children}
-						<Footer />
-						<Toaster position="top-center" richColors="true"/>
-					</QueryClientProvider>
-			
-			</body>
+
+							{children}
+							<Footer />
+							<Toaster position="top-center" richColors="true" />
+						</QueryClientProvider>
+					</WishlistProvider>
+				</body>
 			</AuthProvider>
 		</html>
 	);
