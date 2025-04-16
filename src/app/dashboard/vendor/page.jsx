@@ -359,7 +359,7 @@ export default function VendorDashboard() {
           <CardContent>
             <div className="space-y-2">
               <Button className="w-full justify-start" size="sm" asChild>
-                <Link href="/dashboard/vendor/product">
+                <Link href="/dashboard/vendor/product/add">
                   <Package className="mr-2 h-4 w-4" />
                   Add New Product
                 </Link>

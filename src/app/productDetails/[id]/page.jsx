@@ -18,15 +18,9 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import useProduct from "@/hooks/useProduct";
-import { useWishlist } from "@/context/WishlistContext";
-import axios from "axios";
-import { useSession } from "next-auth/react";
-import { useParams } from "next/navigation";
 
-export default function ProductPage() {
-	const { data: session } = useSession();
-	const params = useParams();
-	const { isInWishlist, toggleWishlistItem, isLoading: wishlistLoading } = useWishlist();
+export default function ProductPage({ params }) {
+
 	const [products] = useProduct();
 	const product = products?.find((p) => p._id == params.id);
 
@@ -142,7 +136,27 @@ export default function ProductPage() {
 					</div>
 
 					<div className="mt-4 flex items-center justify-between">
-						<p className="text-2xl font-bold">${product.price}</p>
+						<div>
+							<p className="text-2xl font-bold">BDT.{product.price}</p>
+							{/* Add in-stock indicator here */}
+							<div className="flex items-center mt-1">
+								<Badge
+									className={
+										product.stock > 0
+											? "bg-green-100 text-green-800"
+											: "bg-red-100 text-red-800"
+									}
+								>
+									{product.stock > 0 ? "In Stock" : "Out of Stock"}
+								</Badge>
+								{product.stock > 0 && (
+									<span className="text-sm text-gray-500 ml-2">
+										{product.stock} {product.stock === 1 ? "item" : "items"}{" "}
+										left
+									</span>
+								)}
+							</div>
+						</div>
 						<div className="flex items-center">
 							<div className="flex">
 								{[...Array(5)].map((_, i) => (
@@ -209,10 +223,8 @@ export default function ProductPage() {
 					</div>
 
 					<div className="flex space-x-4 mb-6">
-						<Button className="" size="lg">
-							<ShoppingCart className="mr-2 h-5 w-5" />
-							Add to Cart
-						</Button>
+						<AddToCart id={product._id} size="lg"></AddToCart>
+
 						<Button variant="secondary" size="lg">
 							Buy Now
 						</Button>
