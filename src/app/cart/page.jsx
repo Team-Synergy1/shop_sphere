@@ -16,14 +16,14 @@ export default function CartPage() {
 
 	// Calculate subtotal based on price * quantity
 	const subtotal = cartItems.reduce((total, item) => {
-		return total + (item.price * (item.quantity || 1));
+		return total + item.price * (item.quantity || 1);
 	}, 0);
 
 	// Calculate total items count
 	const totalItemsCount = cartItems.reduce((count, item) => {
 		return count + (item.quantity || 1);
 	}, 0);
-	
+
 	useEffect(() => {
 		async function fetchCart() {
 			if (status === "loading") return;
@@ -74,12 +74,12 @@ export default function CartPage() {
 			}
 
 			// Update local state
-			setCartItems(cartItems.map(item => 
-				item._id === productId 
-					? { ...item, quantity: newQuantity } 
-					: item
-			));
-			
+			setCartItems(
+				cartItems.map((item) =>
+					item._id === productId ? { ...item, quantity: newQuantity } : item
+				)
+			);
+
 			toast.success("Cart updated successfully");
 		} catch (err) {
 			console.error("Error updating quantity:", err);
@@ -118,7 +118,7 @@ export default function CartPage() {
 		return (
 			<div className="min-h-screen flex justify-center items-center">
 				<div className="text-center">
-					<Loader/>
+					<Loader />
 				</div>
 			</div>
 		);
@@ -131,7 +131,7 @@ export default function CartPage() {
 					<p className="text-red-500">{error}</p>
 					<button
 						onClick={() => window.location.reload()}
-						className="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+						className="mt-2 bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
 					>
 						Retry
 					</button>
@@ -149,7 +149,7 @@ export default function CartPage() {
 						<p className="text-gray-500 mb-4">Your cart is empty</p>
 						<Link
 							href="/products"
-							className="inline-block bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600"
+							className="inline-block bg-orange-500 text-white px-6 py-2 rounded hover:bg-orange-600"
 						>
 							Continue Shopping
 						</Link>
@@ -162,7 +162,9 @@ export default function CartPage() {
 	return (
 		<div className="min-h-screen py-10 px-4">
 			<div className="max-w-6xl mx-auto">
-				<h1 className="text-2xl font-bold mb-8">{session.user.name} ({totalItemsCount} items order)</h1>
+				<h1 className="text-2xl font-bold mb-8">
+					{session.user.name} ({totalItemsCount} items order)
+				</h1>
 
 				<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 					{/* Cart Items */}
@@ -192,20 +194,34 @@ export default function CartPage() {
 										)}
 										<div className="mt-2 flex justify-between items-center">
 											<div className="flex items-center">
-												<p className="font-semibold mr-4">BDT.{item.price.toFixed(2)}</p>
-												
+												<p className="font-semibold mr-4">
+													BDT.{item.price.toFixed(2)}
+												</p>
+
 												{/* Quantity controls */}
-												<div className="flex items-center border rounded">
-													<button 
-														onClick={() => updateItemQuantity(item._id, (item.quantity || 1) - 1)}
+												<div className="flex items-center border rounded ">
+													<button
+														onClick={() =>
+															updateItemQuantity(
+																item._id,
+																(item.quantity || 1) - 1
+															)
+														}
 														className="px-2 py-1 text-gray-600 hover:bg-gray-100"
 														aria-label="Decrease quantity"
 													>
 														-
 													</button>
-													<span className="px-3 py-1">{item.quantity || 1}</span>
-													<button 
-														onClick={() => updateItemQuantity(item._id, (item.quantity || 1) + 1)}
+													<span className="px-3 py-1">
+														{item.quantity || 1}
+													</span>
+													<button
+														onClick={() =>
+															updateItemQuantity(
+																item._id,
+																(item.quantity || 1) + 1
+															)
+														}
 														className="px-2 py-1 text-gray-600 hover:bg-gray-100"
 														aria-label="Increase quantity"
 													>
@@ -213,20 +229,21 @@ export default function CartPage() {
 													</button>
 												</div>
 											</div>
-											
+
 											<button
 												onClick={() => removeFromCart(item._id)}
-												className="text-red-500 hover:text-red-700 text-sm"
+												className="text-red-500 hover:text-red-700 text-sm ml-2 md:ml-0"
 												aria-label="Remove item"
 											>
 												Remove
 											</button>
 										</div>
-										
+
 										{/* Item subtotal */}
 										<div className="mt-2 text-right">
 											<p className="text-sm text-gray-500">
-												Subtotal: BDT.{((item.price || 0) * (item.quantity || 1)).toFixed(2)}
+												Subtotal: BDT.
+												{((item.price || 0) * (item.quantity || 1)).toFixed(2)}
 											</p>
 										</div>
 									</div>
@@ -258,16 +275,16 @@ export default function CartPage() {
 								</div>
 							</div>
 
-							<button 
+							<button
 								onClick={handleCheckout}
-								className="w-full bg-blue-500 text-white py-3 rounded-md mt-6 hover:bg-blue-600"
+								className="w-full bg-orange-500 text-white py-3 rounded-md mt-6 hover:bg-orange-600"
 							>
 								Proceed to Checkout
 							</button>
 
 							<Link
 								href="/products"
-								className="block text-center text-blue-500 mt-4 hover:underline"
+								className="block text-center text-orange-500 mt-4 hover:underline"
 							>
 								Continue Shopping
 							</Link>

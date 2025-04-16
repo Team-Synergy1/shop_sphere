@@ -590,7 +590,7 @@ export default function AddProductPage() {
 
 										<div className="flex gap-2">
 											<Input
-												placeholder="Add a color (e.g. Black, Navy Blue)"
+												placeholder="Add a color (e.g. Black, Navy orange)"
 												value={newColor}
 												onChange={(e) => setNewColor(e.target.value)}
 												className="flex-1"
@@ -641,7 +641,7 @@ export default function AddProductPage() {
 
 										<div className="flex gap-2">
 											<Input
-												placeholder="Add a feature (e.g. Bluetooth 5.2)"
+												placeholder="Add a feature (e.g. orangetooth 5.2)"
 												value={newFeature}
 												onChange={(e) => setNewFeature(e.target.value)}
 												className="flex-1"
