@@ -2,10 +2,11 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Heart, Star } from "lucide-react";
+import { Star } from "lucide-react";
 import Link from "next/link";
 import AddToCart from "@/components/share/addToCart";
+import WishlistButton from "./WislistButton";
+
 
 export default function ProductGrid({
   products = [],
@@ -54,19 +55,19 @@ export default function ProductGrid({
                     className="w-full h-36 object-cover"
                   />
                 </Link>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute top-1 right-1 bg-white bg-opacity-50 rounded-full p-1"
-                >
-                  <Heart className="text-red-500" size={14} />
-                </Button>
+                <div className="absolute -top-5 right-1 ">
+                  <WishlistButton 
+                    productId={getProductId(product)}
+                    initialState={product.inWishlist || false}
+                  />
+                </div>
               </CardHeader>
               <CardContent className="p-2">
                 <Link href={`/productDetails/${getProductId(product)}`}>
                   <h3 className="text-sm font-medium line-clamp-1">
                     {product.name}
                   </h3>
+                  
                   <div className="flex justify-between items-center mt-1">
                     <span className="font-bold text-sm">
                       ${product.price}
@@ -96,13 +97,16 @@ export default function ProductGrid({
           ) : (
             <CardContent className="p-2">
               <div className="flex gap-2">
-                <Link href={`/productDetails/${getProductId(product)}`}>
-                  <img
-                    src={product.images?.[0] || product.image}
-                    alt={product.name}
-                    className="w-16 h-16 object-cover rounded"
-                  />
-                </Link>
+                <div className="relative">
+                  <Link href={`/productDetails/${getProductId(product)}`}>
+                    <img
+                      src={product.images?.[0] || product.image}
+                      alt={product.name}
+                      className="w-16 h-16 object-cover rounded"
+                    />
+                  </Link>
+                
+                </div>
                 <div className="flex flex-col justify-between flex-grow">
                   <div>
                     <Link href={`/productDetails/${getProductId(product)}`}>

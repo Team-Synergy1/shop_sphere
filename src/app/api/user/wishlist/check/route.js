@@ -1,38 +1,39 @@
-import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/db";
-import Wishlist from "@/models/Wishlist";
+// src/app/api/user/wishlist/check/route.js
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-
+import { NextResponse } from "next/server";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"; 
+import {connectDB} from "@/lib/db";
+import User from "@/models/User";
 
 export async function POST(request) {
   try {
-    await connectDB();
-
     const session = await getServerSession(authOptions);
-
-    if (!session) {
-      return NextResponse.json({ inWishlist: false }, { status: 200 });
+    
+    if (!session || !session.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    const userId = session.user.id;
+    
     const { productId } = await request.json();
-
+    
     if (!productId) {
       return NextResponse.json({ error: "Product ID is required" }, { status: 400 });
     }
-
-    // Find the user's wishlist
-    const wishlist = await Wishlist.findOne({
-      user_id: userId,
-      products: productId
-    });
-
-    return NextResponse.json({
-      inWishlist: !!wishlist
-    }, { status: 200 });
+    
+    await connectDB();
+    const user = await User.findOne({ email: session.user.email });
+    
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+    
+    // Check if product is in wishlist
+    const isInWishlist = user.wishlist && user.wishlist.some(id => 
+      id.toString() === productId.toString()
+    );
+    
+    return NextResponse.json({ isInWishlist });
   } catch (error) {
-    console.error("Error checking wishlist:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    console.error("Check wishlist error:", error);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

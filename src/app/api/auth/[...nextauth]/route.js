@@ -10,6 +10,17 @@ export const authOptions = {
 		GoogleProvider({
 			clientId: process.env.GOOGLE_CLIENT_ID,
 			clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+			authorization: {
+				params: {
+					// Include `callbackUrl` in the `state` parameter
+					state: JSON.stringify({
+						callbackUrl: "/", // Default fallback URL
+						...(typeof window !== "undefined" && window.location.href
+							? { from: window.location.pathname }
+							: {}),
+					}),
+				},
+			},
 		}),
 		CredentialsProvider({
 			name: "Credentials",
