@@ -26,6 +26,7 @@ import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
 import Loader from "@/app/loading";
 import WishlistButton from "@/components/share/WislistButton";
+import PurchaseButton from "@/components/PurchaseButton";
 
 export default function ProductPage() {
 	const { data: session } = useSession();
@@ -228,11 +229,8 @@ export default function ProductPage() {
 					</div>
 
 					<div className="flex space-x-4 mb-6">
-						<AddToCart id={product._id} size="lg"></AddToCart>
-
-						<Button variant="secondary" size="lg">
-							Buy Now
-						</Button>
+						<AddToCart id={product._id} size="lg" />
+						<PurchaseButton productId={product._id} />
 					</div>
 
 					{/* Shipping Info
