@@ -36,6 +36,7 @@ export async function POST(request) {
     
     // Send email with reset link
     const resetUrl = `${process.env.NEXTAUTH_URL}/reset-password/${resetToken}`;
+
     await sendResetEmail(user.email, resetUrl);
     
     return NextResponse.json({ success: true, message: 'A Password reset link sent to your email' });

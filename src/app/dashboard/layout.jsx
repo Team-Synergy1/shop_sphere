@@ -46,6 +46,7 @@ import {
 } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { signOut, useSession } from "next-auth/react";
+import Loader from "../loading";
 
 export default function DashboardLayout({ children }) {
 	const pathname = usePathname();
@@ -202,9 +203,7 @@ export default function DashboardLayout({ children }) {
 
 	if (status === "loading") {
 		return (
-			<div className="flex justify-center items-center min-h-screen">
-				<div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-			</div>
+			<Loader></Loader>
 		);
 	}
 

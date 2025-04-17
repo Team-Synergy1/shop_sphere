@@ -78,7 +78,7 @@ export const authOptions = {
 	callbacks: {
 		async signIn({ user, account }) {
 			// Only proceed for Google accounts
-			if (account.provider === "google") {
+			if (account?.provider === "google") {
 				try {
 					await connectDB();
 
@@ -120,7 +120,7 @@ export const authOptions = {
 			}
 			return true;
 		},
-		async jwt({ token, user, account }) {
+		async jwt({ token, user }) {
 			if (user) {
 				token.id = user.id;
 				token.role = user.role;
@@ -133,6 +133,13 @@ export const authOptions = {
 				session.user.role = token.role;
 			}
 			return session;
+		},
+		async redirect({ url, baseUrl }) {
+			// Allows relative callback URLs
+			if (url.startsWith("/")) return `${baseUrl}${url}`;
+			// Allows callback URLs on the same origin
+			else if (new URL(url).origin === baseUrl) return url;
+			return baseUrl;
 		},
 	},
 	session: {

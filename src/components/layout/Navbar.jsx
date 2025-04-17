@@ -117,9 +117,58 @@ const useCartCount = () => {
 	return { cartItemCount, refreshCart: fetchCartItems };
 };
 
+// New hook for wishlist count
+const useWishlistCount = () => {
+	const { data: session } = useSession();
+	const [wishlistItemCount, setWishlistItemCount] = useState(0);
+
+	const fetchWishlistItems = async () => {
+		try {
+			if (session?.user) {
+				const response = await fetch("/api/user/wishlist");
+				const data = await response.json();
+
+				setWishlistItemCount(data?.wishlist?.length || 0);
+			}
+		} catch (error) {
+			console.error("Failed to fetch wishlist items:", error);
+			setWishlistItemCount(0);
+		}
+	};
+
+	useEffect(() => {
+		// Initial fetch
+		fetchWishlistItems();
+
+		const intervalId = setInterval(fetchWishlistItems, 5000);
+
+		const handleWishlistUpdate = (event) => {
+			if (event.detail && event.detail.wishlistItems) {
+				setWishlistItemCount(event.detail.wishlistItems.length || 0);
+			} else {
+				fetchWishlistItems();
+			}
+		};
+
+		if (typeof window !== "undefined") {
+			window.addEventListener("wishlistUpdated", handleWishlistUpdate);
+		}
+
+		return () => {
+			clearInterval(intervalId);
+			if (typeof window !== "undefined") {
+				window.removeEventListener("wishlistUpdated", handleWishlistUpdate);
+			}
+		};
+	}, [session]);
+
+	return { wishlistItemCount, refreshWishlist: fetchWishlistItems };
+};
+
 export default function Navbar() {
 	const { data: session } = useSession();
 	const { cartItemCount, refreshCart } = useCartCount();
+	const { wishlistItemCount, refreshWishlist } = useWishlistCount();
 	const pathName = usePathname();
 
 	const handleLogout = () => {
@@ -250,10 +299,18 @@ export default function Navbar() {
 
 							{/* Wishlist */}
 							<Link
-								href="/wishlist"
+								href="dashboard/user/wishlist"
 								className="flex flex-col items-center p-1 text-gray-700 hover:text-orange-500"
+								onClick={() => refreshWishlist()} // Refresh wishlist count when navigating to wishlist
 							>
-								<Heart size={24} />
+								<div className="relative">
+									<Heart size={24} />
+									{wishlistItemCount > 0 && (
+										<span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+											{wishlistItemCount > 99 ? "99+" : wishlistItemCount}
+										</span>
+									)}
+								</div>
 								<span className="text-xs hidden md:inline-block">Wishlist</span>
 							</Link>
 

@@ -18,7 +18,7 @@ export function JustForYou() {
 	const products = [
 		{
 			id: 1,
-			name: "Wireless Bluetooth Headphones",
+			name: "Wireless orangetooth Headphones",
 			price: 2999,
 			discountPrice: 1999,
 			image:
