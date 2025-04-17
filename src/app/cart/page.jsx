@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Loader from "../loading";
+import { loadStripe } from "@stripe/stripe-js";
 
 export default function CartPage() {
 	const [cartItems, setCartItems] = useState([]);
@@ -109,9 +110,32 @@ export default function CartPage() {
 		}
 	};
 
-	const handleCheckout = () => {
-		// Implement checkout functionality or navigation
-		router.push("/checkout");
+	const handleCheckout = async () => {
+		try {
+			setIsLoading(true);
+			const response = await fetch("/api/checkout/stripe", {
+				method: "POST",
+			});
+
+			if (!response.ok) {
+				throw new Error("Failed to create checkout session");
+			}
+
+			const { id: sessionId } = await response.json();
+
+			// Redirect to Stripe checkout
+			const stripe = await loadStripe(
+				process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+			);
+			await stripe.redirectToCheckout({
+				sessionId,
+			});
+		} catch (err) {
+			console.error("Checkout error:", err);
+			toast.error("Failed to proceed to checkout. Please try again.");
+		} finally {
+			setIsLoading(false);
+		}
 	};
 
 	if (status === "loading" || isLoading) {
