@@ -1,5 +1,35 @@
 import mongoose from "mongoose";
 
+const AddressSchema = new mongoose.Schema(
+	{
+		street: {
+			type: String,
+			required: true,
+		},
+		city: {
+			type: String,
+			required: true,
+		},
+		state: {
+			type: String,
+			required: true,
+		},
+		postalCode: {
+			type: String,
+			required: true,
+		},
+		country: {
+			type: String,
+			required: true,
+		},
+		isDefault: {
+			type: Boolean,
+			default: false,
+		},
+	},
+	{ _id: true, timestamps: true }
+);
+
 const UserSchema = new mongoose.Schema({
 	name: {
 		type: String,
@@ -19,6 +49,7 @@ const UserSchema = new mongoose.Schema({
 		required: [true, "Please provide a password"],
 		minlength: 6,
 	},
+	addresses: [AddressSchema],
 	role: {
 		type: String,
 		enum: ["user", "admin", "vendor"],

@@ -299,7 +299,7 @@ export default function Navbar() {
 
 							{/* Wishlist */}
 							<Link
-								href="/wishlist"
+								href="dashboard/user/wishlist"
 								className="flex flex-col items-center p-1 text-gray-700 hover:text-orange-500"
 								onClick={() => refreshWishlist()} // Refresh wishlist count when navigating to wishlist
 							>
