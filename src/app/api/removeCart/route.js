@@ -3,6 +3,7 @@ import { authOptions } from "../auth/[...nextauth]/route";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import User from "@/models/User";
+import mongoose from "mongoose";
 
 // Helper function to validate user session and get user data
 async function getUserFromSession(session) {
@@ -47,7 +48,20 @@ export async function POST(req) {
 		// Use atomic operation to remove item from cart
 		const updatedUser = await User.findOneAndUpdate(
 			{ _id: userResult.user._id },
-			{ $pull: { cart: { _id: productId } } },
+			{
+				$pull: {
+					cart: {
+						$or: [
+							{ _id: productId },
+							{
+								_id: mongoose.Types.ObjectId.isValid(productId)
+									? new mongoose.Types.ObjectId(productId)
+									: productId,
+							},
+						],
+					},
+				},
+			},
 			{ new: true }
 		);
 

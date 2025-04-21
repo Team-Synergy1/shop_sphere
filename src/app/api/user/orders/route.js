@@ -18,15 +18,18 @@ export async function GET(request) {
 		const limit = parseInt(searchParams.get("limit") || "10");
 		const status = searchParams.get("status");
 
-		const query = { userId: session.user.id };
+		const query = { user: session.user.id };
 		if (status) query.status = status;
 
 		const skip = (page - 1) * limit;
 		const total = await Order.countDocuments(query);
 		const pages = Math.ceil(total / limit);
 
-		const orders = await Order.find();
-			console.log(orders);
+		const orders = await Order.find(query)
+			.sort({ createdAt: -1 })
+			.skip(skip)
+			.limit(limit)
+			.populate("items.product", "name images price");
 
 		return NextResponse.json({
 			orders,
@@ -60,8 +63,8 @@ export async function POST(request) {
 
 		const order = await Order.findOne({
 			_id: orderId,
-			userId: session.user.id,
-		}).populate("items.product", "title images price");
+			user: session.user.id,
+		}).populate("items.product", "name images price");
 
 		if (!order) {
 			return NextResponse.json({ error: "Order not found" }, { status: 404 });
