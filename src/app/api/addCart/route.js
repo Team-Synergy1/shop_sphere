@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import User from "@/models/User";
 
-// Helper function to validate user session and get user data
+
 async function getUserFromSession(session) {
 	if (!session?.user) {
 		return { error: "Unauthorized. Please log in.", status: 401 };
@@ -24,82 +24,105 @@ async function getUserFromSession(session) {
 }
 
 export async function POST(req) {
-	try {
-		await connectDB();
-		const session = await getServerSession(authOptions);
-		const userResult = await getUserFromSession(session);
+    try {
+        await connectDB();
+        const session = await getServerSession(authOptions);
+        const userResult = await getUserFromSession(session);
 
-		if (userResult.error) {
-			return NextResponse.json(
-				{ message: userResult.error },
-				{ status: userResult.status }
-			);
-		}
+        if (userResult.error) {
+            return NextResponse.json(
+                { message: userResult.error },
+                { status: userResult.status }
+            );
+        }
 
-		const product = await req.json();
-		const user = userResult.user;
+        const product = await req.json();
+        
+        // Validate product data
+        if (!product || !product._id) {
+            return NextResponse.json(
+                { message: "Invalid product data" },
+                { status: 400 }
+            );
+        }
 
-		// Initialize cart if it doesn't exist
-		if (!user.cart || !Array.isArray(user.cart)) {
-			const updatedUser = await User.findByIdAndUpdate(
-				user._id,
-				{ $set: { cart: [{ ...product, quantity: 1 }] } },
-				{ new: true }
-			);
+        const user = userResult.user;
 
-			return NextResponse.json({
-				message: "Product added to cart successfully",
-				cart: updatedUser.cart,
-				updated: false,
-				quantity: 1,
-			});
-		}
+        // Initialize cart if it doesn't exist
+        if (!user.cart || !Array.isArray(user.cart)) {
+            const updatedUser = await User.findByIdAndUpdate(
+                user._id,
+                { $set: { cart: [{ ...product, quantity: 1 }] } },
+                { new: true }
+            ).catch(err => {
+                console.error("Error updating user cart:", err);
+                throw new Error("Failed to update cart");
+            });
 
-		// Check if product already exists in cart
-		const existingProductIndex = user.cart.findIndex(
-			(item) => item._id.toString() === product._id.toString()
-		);
+            if (!updatedUser) {
+                return NextResponse.json(
+                    { message: "Failed to update cart" },
+                    { status: 500 }
+                );
+            }
 
-		if (existingProductIndex !== -1) {
-			// Update quantity of existing product
-			const currentQuantity = user.cart[existingProductIndex].quantity || 1;
-			const newQuantity = currentQuantity + 1;
-			user.cart[existingProductIndex].quantity = newQuantity;
+            return NextResponse.json({
+                message: "Product added to cart successfully",
+                cart: updatedUser.cart,
+                updated: false,
+                quantity: 1,
+            });
+        }
 
-			const updatedUser = await User.findByIdAndUpdate(
-				user._id,
-				{ $set: { cart: user.cart } },
-				{ new: true }
-			);
+        // Check if product already exists in cart
+        const existingProductIndex = user.cart.findIndex(
+            (item) => item._id.toString() === product._id.toString()
+        );
 
-			return NextResponse.json({
-				message: "Product quantity updated in cart",
-				cart: updatedUser.cart,
-				updated: true,
-				quantity: newQuantity,
-			});
-		} else {
-			// Add new product to cart
-			const updatedUser = await User.findByIdAndUpdate(
-				user._id,
-				{ $push: { cart: { ...product, quantity: 1 } } },
-				{ new: true }
-			);
+        let updatedCart;
+        if (existingProductIndex !== -1) {
+            // Update quantity if product exists
+            const newQuantity = user.cart[existingProductIndex].quantity + 1;
+            user.cart[existingProductIndex].quantity = newQuantity;
+            updatedCart = [...user.cart];
+        } else {
+            // Add new product if it doesn't exist
+            updatedCart = [...user.cart, { ...product, quantity: 1 }];
+        }
 
-			return NextResponse.json({
-				message: "Product added to cart successfully",
-				cart: updatedUser.cart,
-				updated: false,
-				quantity: 1,
-			});
-		}
-	} catch (error) {
-		console.error("Error saving product:", error);
-		return NextResponse.json(
-			{ message: "Error saving product", error: error.message },
-			{ status: 500 }
-		);
-	}
+        const updatedUser = await User.findByIdAndUpdate(
+            user._id,
+            { $set: { cart: updatedCart } },
+            { new: true }
+        ).catch(err => {
+            console.error("Error updating user cart:", err);
+            throw new Error("Failed to update cart");
+        });
+
+        if (!updatedUser) {
+            return NextResponse.json(
+                { message: "Failed to update cart" },
+                { status: 500 }
+            );
+        }
+
+        return NextResponse.json({
+            message: "Cart updated successfully",
+            cart: updatedUser.cart,
+            updated: existingProductIndex !== -1,
+            quantity: existingProductIndex !== -1 ? updatedUser.cart[existingProductIndex].quantity : 1,
+        });
+
+    } catch (error) {
+        console.error("Error processing cart operation:", error);
+        return NextResponse.json(
+            { 
+                message: "Error processing cart operation", 
+                error: error.message 
+            },
+            { status: 500 }
+        );
+    }
 }
 
 export async function GET() {

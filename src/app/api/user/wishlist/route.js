@@ -42,7 +42,13 @@ export async function GET(request) {
 			_id: { $in: wishlistIds },
 		}).select("name price images stock");
 
-		return NextResponse.json({ wishlist: wishlistItems });
+		// Transform the items to include inStock property
+		const transformedItems = wishlistItems.map(item => ({
+			...item.toObject(),
+			inStock: item.stock > 0
+		}));
+
+		return NextResponse.json({ wishlist: transformedItems });
 	} catch (error) {
 		console.error("Fetch wishlist error:", error);
 		return NextResponse.json({ error: "Server error" }, { status: 500 });

@@ -34,6 +34,24 @@ export default function Login() {
 	const onSubmit = async (data) => {
 		setIsLoading(true);
 		try {
+			// Check if cookies are enabled
+			if (!navigator.cookieEnabled) {
+				toast.error("Please enable cookies to sign in");
+				return;
+			}
+
+			// Try to write and read a test cookie
+			const testCookie = "testCookie";
+			document.cookie = testCookie + "=1";
+			const hasCookie = document.cookie.indexOf(testCookie) !== -1;
+
+			if (!hasCookie) {
+				toast.error(
+					"Third-party cookies are blocked. Please adjust your browser settings to continue."
+				);
+				return;
+			}
+
 			const result = await signIn("credentials", {
 				email: data.email,
 				password: data.password,
@@ -55,6 +73,11 @@ export default function Login() {
 	};
 
 	const handleGoogleSignIn = async () => {
+		if (!navigator.cookieEnabled) {
+			toast.error("Please enable cookies to sign in");
+			return;
+		}
+
 		setIsLoading(true);
 		try {
 			await signIn("google", { callbackUrl });

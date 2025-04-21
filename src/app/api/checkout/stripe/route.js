@@ -31,7 +31,7 @@ export async function POST() {
 				const product = await Product.findById(item._id);
 				return {
 					price_data: {
-						currency: "usd",
+						currency: "bdt",
 						product_data: {
 							name: product.name,
 							images: [product.image],

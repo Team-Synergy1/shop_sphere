@@ -13,53 +13,74 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
+import Loader from "@/app/loading";
 
 const useWishlistCount = () => {
 	const { data: session } = useSession();
 	const [wishlistItemCount, setWishlistItemCount] = useState(0);
+	const [isLoading, setIsLoading] = useState(false);
+	const lastFetchRef = useRef(Date.now());
 
-	const fetchWishlistItems = async () => {
+	const fetchWishlistItems = async (force = false) => {
+		if (!session?.user) return;
+
+		// Prevent frequent refetches
+		const now = Date.now();
+		if (!force && now - lastFetchRef.current < 5000) return;
+
+		if (isLoading) return;
+
 		try {
-			if (session?.user) {
-				const response = await fetch("/api/user/wishlist");
-				const data = await response.json();
+			setIsLoading(true);
+			lastFetchRef.current = now;
 
+			const response = await fetch("/api/user/wishlist");
+			const data = await response.json();
+
+			if (data?.wishlist?.length !== wishlistItemCount) {
 				setWishlistItemCount(data?.wishlist?.length || 0);
 			}
 		} catch (error) {
 			console.error("Failed to fetch wishlist items:", error);
-			setWishlistItemCount(0);
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
 	useEffect(() => {
-		fetchWishlistItems();
+		if (session?.user) {
+			fetchWishlistItems(true);
+		}
 
-		const intervalId = setInterval(fetchWishlistItems, 5000);
+		// Reduced polling interval to reduce rebuilds
+		const intervalId = setInterval(() => fetchWishlistItems(), 30000);
 
 		const handleWishlistUpdate = (event) => {
-			if (event.detail && event.detail.wishlistItems) {
-				setWishlistItemCount(event.detail.wishlistItems.length || 0);
+			if (event.detail?.wishlistItems) {
+				const count = event.detail.wishlistItems.length || 0;
+				if (count !== wishlistItemCount) {
+					setWishlistItemCount(count);
+				}
 			} else {
-				fetchWishlistItems();
+				fetchWishlistItems(true);
 			}
 		};
 
-		if (typeof window !== "undefined") {
-			window.addEventListener("wishlistUpdated", handleWishlistUpdate);
-		}
+		window.addEventListener("wishlistUpdated", handleWishlistUpdate);
 
 		return () => {
 			clearInterval(intervalId);
-			if (typeof window !== "undefined") {
-				window.removeEventListener("wishlistUpdated", handleWishlistUpdate);
-			}
+			window.removeEventListener("wishlistUpdated", handleWishlistUpdate);
 		};
 	}, [session]);
 
-	return { wishlistItemCount, refreshWishlist: fetchWishlistItems };
+	return {
+		wishlistItemCount,
+		refreshWishlist: () => fetchWishlistItems(true),
+		isLoading,
+	};
 };
 
 export default function UserDashboard() {
@@ -74,10 +95,19 @@ export default function UserDashboard() {
 	useEffect(() => {
 		if (status !== "authenticated") return;
 		setLoading(true);
-		async function fetchData() {
+		const fetchData = async () => {
 			try {
-				const ordersRes = await axios.get("/api/user/orders");
-				setOrders(ordersRes.data.orders || []);
+				const ordersRes = await axios.get("/api/orders/get");
+				const ordersData = ordersRes.data.orders || [];
+				// Transform orders data to match the component's expected format
+				const formattedOrders = ordersData.map(order => ({
+					id: order._id,
+					date: new Date(order.createdAt).toLocaleDateString(),
+					items: order.items.length,
+					status: order.status,
+					amount: order.totalAmount
+				}));
+				setOrders(formattedOrders);
 
 				const addressRes = await axios.get("/api/user/addresses");
 				setAddressCount(addressRes.data.addresses?.length || 0);
@@ -86,20 +116,17 @@ export default function UserDashboard() {
 				setRewardPoints(pointsRes.data.points || 0);
 
 				const wishlistRes = await axios.get("/api/user/wishlist");
-				if (wishlistRes.data) {
-					console.log("Fetched wishlist item:", wishlistRes.data);
-					setWishlistItems(wishlistRes.data);
-				}
+				setWishlistItems(wishlistRes.data.wishlist || []);
 			} catch (e) {
 				console.error("Error fetching dashboard data:", e);
 			} finally {
 				setLoading(false);
 			}
-		}
+		};
 		fetchData();
 	}, [status]);
 
-	if (loading) return <div>Loading...</div>;
+	if (loading) return <div><Loader></Loader></div>;
 
 	return (
 		<div>
@@ -194,7 +221,7 @@ export default function UserDashboard() {
 												{order?.status}
 											</div>
 											<p className="text-sm font-medium">
-												${order?.amount.toFixed(2)}
+												BDT.{order?.amount.toFixed(2)}
 											</p>
 											<Button variant="outline" size="sm" asChild>
 												<Link href={`/dashboard/user/orders/${order?.id}`}>

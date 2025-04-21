@@ -4,6 +4,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 import Order from "@/models/Order";
+import Product from "@/models/Product";
 import Stripe from "stripe";
 
 import mongoose from "mongoose";
@@ -20,92 +21,106 @@ export async function POST(request) {
 			);
 		}
 
-		const { sessionId } = await request.json();
-		if (!sessionId) {
-			return NextResponse.json(
-				{ error: "Session ID is required" },
-				{ status: 400 }
-			);
-		}
-
 		await connectDB();
+		const user = await User.findById(session.user.id).populate("cart");
 
-		const stripeSession = await stripe.checkout.sessions.retrieve(sessionId);
-		console.log("Stripe session:", stripeSession);
-		if (stripeSession.payment_status !== "paid") {
-			return NextResponse.json(
-				{ error: "Payment not completed" },
-				{ status: 400 }
-			);
-		}
-
-		const user = await User.findById(session.user.id);
-		if (!user) {
-			return NextResponse.json({ error: "User not found" }, { status: 404 });
-		}
-
-		if (!user.cart || user.cart.length === 0) {
+		if (!user?.cart?.length) {
 			return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
 		}
 
-		const lineItems = await stripe.checkout.sessions.listLineItems(sessionId);
-		const used = await User.findById(session.user.id).select("addresses");
-		console.log("User address:", used);
+		const { paymentMethod, isCashOnDelivery, sessionId } = await request.json();
 
-		const formattedItems = [];
-		for (const item of lineItems.data) {
-			const productName = item.description;
-			const productPrice = item.price.unit_amount / 100;
-			const quantity = item.quantity;
-
-			formattedItems.push({
-				product: new mongoose.Types.ObjectId(),
-				name: productName,
-				price: productPrice,
-				quantity: quantity,
-				subtotal: productPrice * quantity,
-			});
+		// Check stock availability and update products
+		for (const item of user.cart) {
+			const product = await Product.findById(item._id);
+			if (!product) {
+				return NextResponse.json(
+					{ error: `Product ${item._id} not found` },
+					{ status: 404 }
+				);
+			}
+			if (product.stock < (item.quantity || 1)) {
+				return NextResponse.json(
+					{
+						error: `Insufficient stock for ${product.name}. Available: ${product.stock}`,
+						productId: product._id,
+					},
+					{ status: 400 }
+				);
+			}
 		}
 
-		const totalAmount = formattedItems.reduce(
-			(sum, item) => sum + item.subtotal,
-			0
-		);
+		let formattedItems = [];
+		let totalAmount = 0;
 
+		// Update stock and format order items
+		for (const item of user.cart) {
+			const product = await Product.findById(item._id);
+
+			// Deduct stock
+			const newStock = product.stock - (item.quantity || 1);
+			await Product.findByIdAndUpdate(item._id, {
+				stock: newStock,
+				inStock: newStock > 0,
+			});
+
+			formattedItems.push({
+				product: item._id,
+				name: item.name,
+				price: item.price,
+				quantity: item.quantity || 1,
+				subtotal: item.price * (item.quantity || 1),
+			});
+
+			totalAmount += item.price * (item.quantity || 1);
+		}
+
+		// Generate order number
 		const orderNumber = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
-		// Find the default address or use the first one
+		// Get user's address
+		const userWithAddresses = await User.findById(session.user.id).select(
+			"addresses"
+		);
 		const defaultAddress =
-			used.addresses.find((addr) => addr.isDefault) || used.addresses[0];
+			userWithAddresses.addresses.find((addr) => addr.isDefault) ||
+			userWithAddresses.addresses[0];
 
-		// Create shipping address safely
-		const shippingAddress = {
-			street: defaultAddress?.street || "Not provided",
-			city: defaultAddress?.city || "Not provided",
-			state: defaultAddress?.state || "Not provided",
-			postalCode: defaultAddress?.postalCode || "Not provided",
-			country: defaultAddress?.country || "Not provided",
-		};
+		if (!defaultAddress) {
+			return NextResponse.json(
+				{ error: "No shipping address found" },
+				{ status: 400 }
+			);
+		}
 
+		// Create the order
 		const order = new Order({
 			user: user._id,
 			orderNumber: orderNumber,
 			items: formattedItems,
 			totalAmount: totalAmount,
-			shippingAddress: shippingAddress,
-			paymentMethod: "card",
-			paymentStatus: "paid",
+			shippingAddress: {
+				street: defaultAddress.street,
+				city: defaultAddress.city,
+				state: defaultAddress.state,
+				postalCode: defaultAddress.postalCode,
+				country: defaultAddress.country,
+			},
+			paymentMethod: paymentMethod,
+			paymentStatus: isCashOnDelivery ? "pending" : "paid",
 			status: "processing",
 		});
 
 		await order.save();
 
+		// Clear the user's cart
 		user.cart = [];
 		await user.save();
 
 		return NextResponse.json({
 			success: true,
 			message: "Order created successfully",
+			orderNumber: order.orderNumber,
 			order: order,
 		});
 	} catch (error) {

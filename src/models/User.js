@@ -30,6 +30,34 @@ const AddressSchema = new mongoose.Schema(
 	{ _id: true, timestamps: true }
 );
 
+const PaymentMethodSchema = new mongoose.Schema({
+	type: {
+		type: String,
+		required: true,
+		enum: ['card']
+	},
+	cardLast4: {
+		type: String,
+		required: true
+	},
+	cardBrand: {
+		type: String,
+		required: true
+	},
+	cardExpiry: {
+		type: String,
+		required: true
+	},
+	isDefault: {
+		type: Boolean,
+		default: false
+	},
+	stripePaymentMethodId: {
+		type: String,
+		required: true
+	}
+}, { timestamps: true });
+
 const UserSchema = new mongoose.Schema({
 	name: {
 		type: String,
@@ -83,6 +111,7 @@ const UserSchema = new mongoose.Schema({
 			ref: "Product", // Assuming you have a Product model
 		},
 	],
+	paymentMethods: [PaymentMethodSchema],
 });
 
 const User = mongoose.models.User || mongoose.model("User", UserSchema);

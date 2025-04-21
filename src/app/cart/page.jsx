@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Loader from "../loading";
 import { loadStripe } from "@stripe/stripe-js";
+import useProduct from "@/hooks/useProduct";
+import PurchaseButton from "@/components/PurchaseButton";
 
 export default function CartPage() {
 	const [cartItems, setCartItems] = useState([]);
@@ -14,13 +16,14 @@ export default function CartPage() {
 	const [error, setError] = useState(null);
 	const { data: session, status } = useSession();
 	const router = useRouter();
+	const [products] = useProduct();
 
-	// Calculate subtotal based on price * quantity
+	//  subtotal based on price * quantity
 	const subtotal = cartItems.reduce((total, item) => {
 		return total + item.price * (item.quantity || 1);
 	}, 0);
 
-	// Calculate total items count
+	//  total items count
 	const totalItemsCount = cartItems.reduce((count, item) => {
 		return count + (item.quantity || 1);
 	}, 0);
@@ -74,7 +77,6 @@ export default function CartPage() {
 				throw new Error("Failed to update item quantity");
 			}
 
-			// Update local state
 			setCartItems(
 				cartItems.map((item) =>
 					item._id === productId ? { ...item, quantity: newQuantity } : item
@@ -111,28 +113,50 @@ export default function CartPage() {
 	};
 
 	const handleCheckout = async () => {
+		if (status !== "authenticated") {
+			const returnUrl = encodeURIComponent(window.location.pathname);
+			router.push(`/login?callbackUrl=${returnUrl}`);
+			return;
+		}
+
 		try {
 			setIsLoading(true);
-			const response = await fetch("/api/checkout/stripe", {
-				method: "POST",
-			});
 
-			if (!response.ok) {
-				throw new Error("Failed to create checkout session");
+			const product = products?.find((p) => p._id === productId);
+			if (!product) {
+				throw new Error("Product not found");
 			}
 
-			const { id: sessionId } = await response.json();
-
-			// Redirect to Stripe checkout
-			const stripe = await loadStripe(
-				process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-			);
-			await stripe.redirectToCheckout({
-				sessionId,
+			const cartResponse = await fetch("/api/addCart", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(product),
 			});
-		} catch (err) {
-			console.error("Checkout error:", err);
-			toast.error("Failed to proceed to checkout. Please try again.");
+
+			if (!cartResponse.ok) {
+				const error = await cartResponse.json();
+				throw new Error(error.message || "Failed to add item to cart");
+			}
+
+			const addressResponse = await fetch("/api/user/address/check");
+			const addressData = await addressResponse.json();
+
+			if (
+				addressData.success &&
+				addressData.addresses &&
+				addressData.addresses.some((addr) => addr.isDefault)
+			) {
+				router.push("/checkout/payment");
+			} else {
+				router.push("/checkout/address");
+			}
+		} catch (error) {
+			console.error("Error during purchase:", error);
+			toast.error(
+				error.message || "Failed to process your request. Please try again."
+			);
 		} finally {
 			setIsLoading(false);
 		}
@@ -293,25 +317,25 @@ export default function CartPage() {
 							</div>
 
 							<div className="border-t pt-4">
-								<div className="flex justify-between font-bold">
+								<div className="flex justify-between font-bold mb-6">
 									<span>Total</span>
 									<span>BDT.{subtotal.toFixed(2)}</span>
 								</div>
+
+								<div className="space-y-4 flex flex-col ">
+									<PurchaseButton
+										productId={null}
+										className="w-full  bg-orange-500 hover:bg-orange-600 text-white"
+									/>
+
+									<Link
+										href="/products"
+										className="block text-center text-orange-500 hover:underline"
+									>
+										Continue Shopping
+									</Link>
+								</div>
 							</div>
-
-							<button
-								onClick={handleCheckout}
-								className="w-full bg-orange-500 text-white py-3 rounded-md mt-6 hover:bg-orange-600"
-							>
-								Proceed to Checkout
-							</button>
-
-							<Link
-								href="/products"
-								className="block text-center text-orange-500 mt-4 hover:underline"
-							>
-								Continue Shopping
-							</Link>
 						</div>
 					</div>
 				</div>
