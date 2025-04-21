@@ -4,23 +4,22 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import User from "@/models/User";
 
-
 async function getUserFromSession(session) {
-	if (!session?.user) {
-		return { error: "Unauthorized. Please log in.", status: 401 };
-	}
+    if (!session?.user) {
+        return { error: "Unauthorized. Please log in.", status: 401 };
+    }
 
-	const user = await User.findById(session.user.id).select("cart role");
+    const user = await User.findById(session.user.id).select("cart role");
 
-	if (!user) {
-		return { error: "User not found.", status: 404 };
-	}
+    if (!user) {
+        return { error: "User not found.", status: 404 };
+    }
 
-	if (user.role === "vendor" || user.role === "admin") {
-		return { error: "Only regular users can access cart", status: 403 };
-	}
+    if (user.role === "vendor" || user.role === "admin") {
+        return { error: "Only regular users can access cart", status: 403 };
+    }
 
-	return { user };
+    return { user };
 }
 
 export async function POST(req) {
@@ -36,7 +35,53 @@ export async function POST(req) {
             );
         }
 
-        const product = await req.json();
+        const user = userResult.user;
+        const data = await req.json();
+
+        // Handle multiple items case
+        if (data.items && Array.isArray(data.items)) {
+            let updatedCart = [...(user.cart || [])];
+
+            // Process each item
+            for (const product of data.items) {
+                if (!product || !product._id) continue;
+
+                const existingProductIndex = updatedCart.findIndex(
+                    (item) => item._id.toString() === product._id.toString()
+                );
+
+                if (existingProductIndex !== -1) {
+                    // Update quantity if product exists
+                    updatedCart[existingProductIndex].quantity = 
+                        (updatedCart[existingProductIndex].quantity || 1) + 1;
+                } else {
+                    // Add new product if it doesn't exist
+                    updatedCart.push({ ...product, quantity: 1 });
+                }
+            }
+
+            // Update user's cart with all items
+            const updatedUser = await User.findByIdAndUpdate(
+                user._id,
+                { $set: { cart: updatedCart } },
+                { new: true }
+            );
+
+            if (!updatedUser) {
+                return NextResponse.json(
+                    { message: "Failed to update cart" },
+                    { status: 500 }
+                );
+            }
+
+            return NextResponse.json({
+                message: "All items added to cart successfully",
+                cart: updatedUser.cart
+            });
+        }
+
+        // Handle single item case
+        const product = data;
         
         // Validate product data
         if (!product || !product._id) {
@@ -45,8 +90,6 @@ export async function POST(req) {
                 { status: 400 }
             );
         }
-
-        const user = userResult.user;
 
         // Initialize cart if it doesn't exist
         if (!user.cart || !Array.isArray(user.cart)) {
@@ -110,7 +153,7 @@ export async function POST(req) {
             message: "Cart updated successfully",
             cart: updatedUser.cart,
             updated: existingProductIndex !== -1,
-            quantity: existingProductIndex !== -1 ? updatedUser.cart[existingProductIndex].quantity : 1,
+            quantity: existingProductIndex !== -1 ? updatedCart[existingProductIndex].quantity : 1,
         });
 
     } catch (error) {
@@ -126,27 +169,27 @@ export async function POST(req) {
 }
 
 export async function GET() {
-	try {
-		await connectDB();
-		const session = await getServerSession(authOptions);
-		const userResult = await getUserFromSession(session);
+    try {
+        await connectDB();
+        const session = await getServerSession(authOptions);
+        const userResult = await getUserFromSession(session);
 
-		if (userResult.error) {
-			return NextResponse.json(
-				{ message: userResult.error },
-				{ status: userResult.status }
-			);
-		}
+        if (userResult.error) {
+            return NextResponse.json(
+                { message: userResult.error },
+                { status: userResult.status }
+            );
+        }
 
-		return NextResponse.json({
-			message: "Cart fetched successfully",
-			cart: userResult.user.cart || [],
-		});
-	} catch (error) {
-		console.error("Error fetching cart:", error);
-		return NextResponse.json(
-			{ message: "Error fetching cart", error: error.message },
-			{ status: 500 }
-		);
-	}
+        return NextResponse.json({
+            message: "Cart fetched successfully",
+            cart: userResult.user.cart || [],
+        });
+    } catch (error) {
+        console.error("Error fetching cart:", error);
+        return NextResponse.json(
+            { message: "Error fetching cart", error: error.message },
+            { status: 500 }
+        );
+    }
 }

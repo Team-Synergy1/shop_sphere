@@ -110,7 +110,7 @@ const WishlistPage = () => {
 									<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
 										Price
 									</th>
-									<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+									<th className="px-6 py-3  text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
 										Stock Status
 									</th>
 									<th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -157,7 +157,7 @@ const WishlistPage = () => {
 										</td>
 										<td className="px-6 py-4 whitespace-nowrap">
 											<div className="text-lg font-medium text-gray-900">
-												${item.price.toFixed(2)}
+												{item.price.toFixed(2)}
 											</div>
 											{item.originalPrice &&
 												item.originalPrice > item.price && (
@@ -200,37 +200,6 @@ const WishlistPage = () => {
 							</tbody>
 						</table>
 
-						{wishlistItems.length > 0 && (
-							<div className="mt-6 text-right">
-								<button
-									onClick={() => {
-										const productIds = wishlistItems
-											.filter((item) => item.inStock)
-											.map((item) => item._id);
-										if (productIds.length === 0) {
-											alert("No in-stock items to add to cart");
-											return;
-										}
-
-										Promise.all(
-											productIds.map((id) =>
-												axios.post("/api/addCart", {
-													...wishlistItems.find(item => item._id === id)
-												})
-											)
-										)
-											.then(() => alert("All available items added to cart"))
-											.catch((err) => {
-												console.error("Error adding items to cart:", err);
-												alert("Failed to add some items to cart");
-											});
-									}}
-									className="bg-orange-600 hover:bg-orange-700 text-white font-medium py-2 px-6 rounded-lg transition duration-150"
-								>
-									Add All to Cart
-								</button>
-							</div>
-						)}
 					</div>
 				)}
 			</div>

@@ -243,7 +243,7 @@ export default function CartPage() {
 										<div className="mt-2 flex justify-between items-center">
 											<div className="flex items-center">
 												<p className="font-semibold mr-4">
-													BDT.{item.price.toFixed(2)}
+													 BDT{item.price.toFixed(2)}
 												</p>
 
 												{/* Quantity controls */}
@@ -290,7 +290,7 @@ export default function CartPage() {
 										{/* Item subtotal */}
 										<div className="mt-2 text-right">
 											<p className="text-sm text-gray-500">
-												Subtotal: BDT.
+												Subtotal:  BDT
 												{((item.price || 0) * (item.quantity || 1)).toFixed(2)}
 											</p>
 										</div>
@@ -308,7 +308,7 @@ export default function CartPage() {
 							<div className="space-y-2 mb-4">
 								<div className="flex justify-between">
 									<span>Items ({totalItemsCount})</span>
-									<span>BDT.{subtotal.toFixed(2)}</span>
+									<span> BDT{subtotal.toFixed(2)}</span>
 								</div>
 								<div className="flex justify-between text-gray-500">
 									<span>Shipping</span>
@@ -319,7 +319,7 @@ export default function CartPage() {
 							<div className="border-t pt-4">
 								<div className="flex justify-between font-bold mb-6">
 									<span>Total</span>
-									<span>BDT.{subtotal.toFixed(2)}</span>
+									<span> BDT{subtotal.toFixed(2)}</span>
 								</div>
 
 								<div className="space-y-4 flex flex-col ">

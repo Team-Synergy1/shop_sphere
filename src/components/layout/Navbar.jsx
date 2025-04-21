@@ -385,32 +385,32 @@ export default function Navbar() {
 										<DropdownMenuSeparator />
 
 										<DropdownMenuItem>
-											<Link href="/account/profile" className="w-full">
+											<Link href="dashboard/user/profile" className="w-full">
 												My Profile
 											</Link>
 										</DropdownMenuItem>
 										<DropdownMenuItem>
-											<Link href="/account/orders" className="w-full">
+											<Link href="dashboard/user/orders" className="w-full">
 												My Orders
 											</Link>
 										</DropdownMenuItem>
 										<DropdownMenuItem>
-											<Link href="/account/returns" className="w-full">
+											<Link href="dashboard/user/returns" className="w-full">
 												My Returns
 											</Link>
 										</DropdownMenuItem>
 										<DropdownMenuItem>
-											<Link href="/account/cancellations" className="w-full">
+											<Link href="dashboard/user/cancellations" className="w-full">
 												My Cancellations
 											</Link>
 										</DropdownMenuItem>
 										<DropdownMenuItem>
-											<Link href="/account/reviews" className="w-full">
+											<Link href="dashboard/user/reviews" className="w-full">
 												My Reviews
 											</Link>
 										</DropdownMenuItem>
 										<DropdownMenuItem>
-											<Link href="/account/vouchers" className="w-full">
+											<Link href="dashboard/user/vouchers" className="w-full">
 												My Vouchers
 											</Link>
 										</DropdownMenuItem>

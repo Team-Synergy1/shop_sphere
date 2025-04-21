@@ -37,6 +37,34 @@ const WishlistPage = () => {
 		fetchWishlist();
 	}, [status]);
 
+	const handleAddAllToCart = async () => {
+		const inStockItems = wishlistItems.filter(item => item.inStock);
+		
+		if (inStockItems.length === 0) {
+			toast.error("No in-stock items to add to cart");
+			return;
+		}
+
+		try {
+			// Add all items to cart in a single request
+			await axios.post("/api/addCart", { items: inStockItems });
+
+			// Show success message
+			toast.success("All available items added to cart");
+
+			// Dispatch event to update cart count in navbar
+			window.dispatchEvent(new CustomEvent("cartUpdated"));
+
+			// Remove added items from wishlist
+			for (const item of inStockItems) {
+				await handleRemoveFromWishlist(item._id);
+			}
+		} catch (err) {
+			console.error("Error adding items to cart:", err);
+			toast.error("Failed to add items to cart");
+		}
+	};
+
 	const handleRemoveFromWishlist = async (productId) => {
 		try {
 			await axios.post("/api/user/wishlist/toggle", { productId });
@@ -44,7 +72,7 @@ const WishlistPage = () => {
 			setWishlistItems(wishlistItems.filter((item) => item._id !== productId));
 		} catch (err) {
 			console.error("Error removing from wishlist:", err);
-			alert("Failed to remove item from wishlist");
+			toast.error("Failed to remove item from wishlist");
 		}
 	};
 
@@ -203,28 +231,7 @@ const WishlistPage = () => {
 						{wishlistItems.length > 0 && (
 							<div className="mt-6 text-right">
 								<button
-									onClick={() => {
-										const productIds = wishlistItems
-											.filter((item) => item.inStock)
-											.map((item) => item._id);
-										if (productIds.length === 0) {
-											alert("No in-stock items to add to cart");
-											return;
-										}
-
-										Promise.all(
-											productIds.map((id) =>
-												axios.post("/api/addCart", {
-													...wishlistItems.find(item => item._id === id)
-												})
-											)
-										)
-											.then(() => alert("All available items added to cart"))
-											.catch((err) => {
-												console.error("Error adding items to cart:", err);
-												alert("Failed to add some items to cart");
-											});
-									}}
+									onClick={handleAddAllToCart}
 									className="bg-orange-600 hover:bg-orange-700 text-white font-medium py-2 px-6 rounded-lg transition duration-150"
 								>
 									Add All to Cart
