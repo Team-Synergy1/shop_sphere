@@ -20,7 +20,7 @@ export default function Discount() {
 		seconds: "00",
 	});
 
-	// Memoize the fetch function to prevent unnecessary recreations
+
 	const fetchDeals = useCallback(async () => {
 		try {
 			setLoading(true);
@@ -39,7 +39,7 @@ export default function Discount() {
 		fetchDeals();
 	}, [fetchDeals]);
 
-	// Memoize the latest end time calculation
+	
 	const latestEndTime = useMemo(() => {
 		if (flashDeals.length === 0) return null;
 		return flashDeals.reduce((latest, current) => {

@@ -4,6 +4,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 import Order from "@/models/Order";
+import Product from "@/models/Product";
 import Stripe from "stripe";
 
 import mongoose from "mongoose";
@@ -29,53 +30,49 @@ export async function POST(request) {
 
 		const { paymentMethod, isCashOnDelivery, sessionId } = await request.json();
 
+		// Check stock availability and update products
+		for (const item of user.cart) {
+			const product = await Product.findById(item._id);
+			if (!product) {
+				return NextResponse.json(
+					{ error: `Product ${item._id} not found` },
+					{ status: 404 }
+				);
+			}
+			if (product.stock < (item.quantity || 1)) {
+				return NextResponse.json(
+					{
+						error: `Insufficient stock for ${product.name}. Available: ${product.stock}`,
+						productId: product._id,
+					},
+					{ status: 400 }
+				);
+			}
+		}
+
 		let formattedItems = [];
 		let totalAmount = 0;
 
-		if (isCashOnDelivery) {
-			// For COD orders, use cart items directly
-			formattedItems = user.cart.map((item) => ({
+		// Update stock and format order items
+		for (const item of user.cart) {
+			const product = await Product.findById(item._id);
+
+			// Deduct stock
+			const newStock = product.stock - (item.quantity || 1);
+			await Product.findByIdAndUpdate(item._id, {
+				stock: newStock,
+				inStock: newStock > 0,
+			});
+
+			formattedItems.push({
 				product: item._id,
 				name: item.name,
 				price: item.price,
 				quantity: item.quantity || 1,
 				subtotal: item.price * (item.quantity || 1),
-			}));
+			});
 
-			totalAmount = formattedItems.reduce(
-				(sum, item) => sum + item.subtotal,
-				0
-			);
-		} else {
-			// For Stripe payments, verify the session
-			if (!sessionId) {
-				return NextResponse.json(
-					{ error: "Session ID is required" },
-					{ status: 400 }
-				);
-			}
-
-			const stripeSession = await stripe.checkout.sessions.retrieve(sessionId);
-			if (stripeSession.payment_status !== "paid") {
-				return NextResponse.json(
-					{ error: "Payment not completed" },
-					{ status: 400 }
-				);
-			}
-
-			const lineItems = await stripe.checkout.sessions.listLineItems(sessionId);
-			formattedItems = lineItems.data.map((item) => ({
-				product: new mongoose.Types.ObjectId(),
-				name: item.description,
-				price: item.price.unit_amount / 100,
-				quantity: item.quantity,
-				subtotal: (item.price.unit_amount / 100) * item.quantity,
-			}));
-
-			totalAmount = formattedItems.reduce(
-				(sum, item) => sum + item.subtotal,
-				0
-			);
+			totalAmount += item.price * (item.quantity || 1);
 		}
 
 		// Generate order number
