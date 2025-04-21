@@ -98,6 +98,12 @@ export default function DashboardLayout({ children }) {
 					icon: <User className="h-5 w-5" />,
 					label: "Profile",
 				},
+				 {
+					href: "/dashboard/user/settings",
+					icon: <Settings className="h-5 w-5" />,
+					
+					label: "Settings",
+				  },
 			]
 		},
 		vendor: {

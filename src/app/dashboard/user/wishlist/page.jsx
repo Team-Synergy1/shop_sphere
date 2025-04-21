@@ -214,9 +214,8 @@ const WishlistPage = () => {
 
 										Promise.all(
 											productIds.map((id) =>
-												axios.post("/api/cart/add", {
-													productId: id,
-													quantity: 1,
+												axios.post("/api/addCart", {
+													...wishlistItems.find(item => item._id === id)
 												})
 											)
 										)

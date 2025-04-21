@@ -157,7 +157,7 @@ export default function OrdersPage() {
 							<div className="flex justify-between">
 								<span className="text-gray-500">Total Amount:</span>
 								<span className="font-medium">
-									${order.totalAmount.toFixed(2)}
+									BDT.{order.totalAmount.toFixed(2)}
 								</span>
 							</div>
 						</div>
@@ -188,7 +188,7 @@ export default function OrdersPage() {
 											{item.product &&
 											item.product.images &&
 											item.product.images[0] ? (
-												<Image
+												<img
 													src={item.product.images[0]}
 													alt={item.name}
 													width={64}
@@ -222,7 +222,7 @@ export default function OrdersPage() {
 											</p>
 										</div>
 										<div className="text-sm font-medium text-gray-900">
-											${item.price.toFixed(2)}
+											BDT.{item.price.toFixed(2)}
 										</div>
 									</div>
 								))}

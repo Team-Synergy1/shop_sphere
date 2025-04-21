@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import {
 	Search,
@@ -51,50 +51,66 @@ const categories = [
 	{ name: "Automotive", url: "/category/automotive" },
 ];
 
+// Optimize the useCartCount hook
 const useCartCount = () => {
 	const { data: session } = useSession();
 	const [cartItemCount, setCartItemCount] = useState(0);
+	const lastFetchTime = useRef(0);
 
-	const fetchCartItems = async () => {
-		try {
-			if (session?.user) {
+	const fetchCartItems = useCallback(
+		async (force = false) => {
+			if (!session?.user) return;
+
+			const now = Date.now();
+			if (!force && now - lastFetchTime.current < 2000) return;
+
+			try {
+				lastFetchTime.current = now;
 				const response = await fetch("/api/addCart");
 				const data = await response.json();
-
 				setCartItemCount(data?.cart?.length || 0);
+			} catch (error) {
+				console.error("Failed to fetch cart items:", error);
+				setCartItemCount(0);
 			}
-		} catch (error) {
-			console.error("Failed to fetch cart items:", error);
-
-			setCartItemCount(0);
-		}
-	};
+		},
+		[session]
+	);
 
 	useEffect(() => {
-		// Initial fetch
-		fetchCartItems();
+		if (session?.user) {
+			fetchCartItems(true);
+		}
 
-		const intervalId = setInterval(fetchCartItems, 5000);
+		// Less frequent polling - every 30 seconds
+		const intervalId = setInterval(() => fetchCartItems(), 30000);
 
+		// Use RAF for smoother updates
+		let frameId;
 		const handleStorageChange = (event) => {
 			if (event.key === "shopSphereCart") {
-				try {
-					if (event.newValue) {
-						const newCart = JSON.parse(event.newValue);
-						setCartItemCount(newCart?.cart?.length || 0);
-					} else {
-						setCartItemCount(0);
+				cancelAnimationFrame(frameId);
+				frameId = requestAnimationFrame(() => {
+					try {
+						if (event.newValue) {
+							const newCart = JSON.parse(event.newValue);
+							setCartItemCount(newCart?.cart?.length || 0);
+						} else {
+							setCartItemCount(0);
+						}
+					} catch (e) {
+						console.error("Error parsing cart data:", e);
 					}
-				} catch (e) {
-					console.error("Error parsing cart data:", e);
-					setCartItemCount(0);
-				}
+				});
 			}
 		};
 
 		const handleCartUpdate = (event) => {
 			if (event.detail && event.detail.cartItems) {
-				setCartItemCount(event.detail.cartItems.length || 0);
+				cancelAnimationFrame(frameId);
+				frameId = requestAnimationFrame(() => {
+					setCartItemCount(event.detail.cartItems.length || 0);
+				});
 			} else {
 				fetchCartItems();
 			}
@@ -107,44 +123,59 @@ const useCartCount = () => {
 
 		return () => {
 			clearInterval(intervalId);
+			cancelAnimationFrame(frameId);
 			if (typeof window !== "undefined") {
 				window.removeEventListener("storage", handleStorageChange);
 				window.removeEventListener("cartUpdated", handleCartUpdate);
 			}
 		};
-	}, [session]);
+	}, [session, fetchCartItems]);
 
-	return { cartItemCount, refreshCart: fetchCartItems };
+	return { cartItemCount, refreshCart: () => fetchCartItems(true) };
 };
 
-// New hook for wishlist count
+// Optimize the useWishlistCount hook
 const useWishlistCount = () => {
 	const { data: session } = useSession();
 	const [wishlistItemCount, setWishlistItemCount] = useState(0);
+	const lastFetchTime = useRef(0);
 
-	const fetchWishlistItems = async () => {
-		try {
-			if (session?.user) {
+	const fetchWishlistItems = useCallback(
+		async (force = false) => {
+			if (!session?.user) return;
+
+			const now = Date.now();
+			if (!force && now - lastFetchTime.current < 2000) return;
+
+			try {
+				lastFetchTime.current = now;
 				const response = await fetch("/api/user/wishlist");
 				const data = await response.json();
-
 				setWishlistItemCount(data?.wishlist?.length || 0);
+			} catch (error) {
+				console.error("Failed to fetch wishlist items:", error);
+				setWishlistItemCount(0);
 			}
-		} catch (error) {
-			console.error("Failed to fetch wishlist items:", error);
-			setWishlistItemCount(0);
-		}
-	};
+		},
+		[session]
+	);
 
 	useEffect(() => {
-		// Initial fetch
-		fetchWishlistItems();
+		if (session?.user) {
+			fetchWishlistItems(true);
+		}
 
-		const intervalId = setInterval(fetchWishlistItems, 5000);
+		// Less frequent polling - every 30 seconds
+		const intervalId = setInterval(() => fetchWishlistItems(), 30000);
 
+		// Use RAF for smoother updates
+		let frameId;
 		const handleWishlistUpdate = (event) => {
 			if (event.detail && event.detail.wishlistItems) {
-				setWishlistItemCount(event.detail.wishlistItems.length || 0);
+				cancelAnimationFrame(frameId);
+				frameId = requestAnimationFrame(() => {
+					setWishlistItemCount(event.detail.wishlistItems.length || 0);
+				});
 			} else {
 				fetchWishlistItems();
 			}
@@ -156,13 +187,14 @@ const useWishlistCount = () => {
 
 		return () => {
 			clearInterval(intervalId);
+			cancelAnimationFrame(frameId);
 			if (typeof window !== "undefined") {
 				window.removeEventListener("wishlistUpdated", handleWishlistUpdate);
 			}
 		};
-	}, [session]);
+	}, [session, fetchWishlistItems]);
 
-	return { wishlistItemCount, refreshWishlist: fetchWishlistItems };
+	return { wishlistItemCount, refreshWishlist: () => fetchWishlistItems(true) };
 };
 
 export default function Navbar() {
@@ -178,7 +210,6 @@ export default function Navbar() {
 	if (!pathName.includes("dashboard")) {
 		return (
 			<header className="sticky top-0 z-50 bg-white shadow-sm">
-				{/* Main navbar */}
 				<div className="container mx-auto px-4 py-3">
 					<div className="flex items-center justify-between gap-4">
 						{/* Mobile menu trigger */}
@@ -299,7 +330,7 @@ export default function Navbar() {
 
 							{/* Wishlist */}
 							<Link
-								href="dashboard/user/wishlist"
+								href="/dashboard/user/wishlist"
 								className="flex flex-col items-center p-1 text-gray-700 hover:text-orange-500"
 								onClick={() => refreshWishlist()} // Refresh wishlist count when navigating to wishlist
 							>
@@ -323,7 +354,7 @@ export default function Navbar() {
 									<div className="relative">
 										<Bell size={24} />
 										<span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-											
+											0
 										</span>
 									</div>
 									<span className="text-xs hidden md:inline-block">
@@ -463,4 +494,5 @@ export default function Navbar() {
 			</header>
 		);
 	}
+	return null;
 }
