@@ -2,17 +2,29 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { ShoppingBag } from "lucide-react";
-import { CheckCircle2, XCircle } from "lucide-react";
+import { CheckCircle2, XCircle, ShoppingBag } from "lucide-react";
 import { useStripe, Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
+import { toast } from "sonner";
 
 const stripePromise = loadStripe(
 	process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 );
+
+// Custom Loader Component
+function PaymentLoader() {
+	return (
+		<div className="flex flex-col items-center justify-center">
+			<div className="relative">
+				<div className="h-16 w-16 rounded-full border-4 border-t-orange-500 border-r-orange-500 border-b-gray-200 border-l-gray-200 animate-spin"></div>
+				<div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+					<ShoppingBag className="h-6 w-6 text-orange-500" />
+				</div>
+			</div>
+		</div>
+	);
+}
 
 export default function CheckoutSuccessPage() {
 	const router = useRouter();
@@ -96,39 +108,44 @@ function CheckoutSuccess({
 			const orderData = await orderResponse.json();
 
 			if (!orderResponse.ok) {
+				// Check if it's a stock-related error
+				if (orderData.productId) {
+					throw new Error(`${orderData.error} Please update your cart.`);
+				}
 				throw new Error(orderData.error || "Failed to process order");
 			}
 
 			setOrderNumber(orderData.orderNumber);
 			setStatus("success");
-
-			// Clear cart after successful order
-			await fetch("/api/removeCart", { method: "POST" });
+			toast.success("Order placed successfully!");
 
 			// Redirect to orders page after a short delay
 			setTimeout(() => {
 				router.push("/dashboard/user/orders");
-			}, 5000);
+			}, 3000);
 		} catch (err) {
 			console.error("Error processing order:", err);
 			setError(err.message || "An error occurred while processing your order");
 			setStatus("failed");
-
-			// Redirect to cart page after error
+			toast.error(err.message || "Failed to process order");
 			setTimeout(() => {
 				router.push("/cart");
 			}, 3000);
 		}
 	}
 
-	// Show appropriate UI based on status
 	if (status === "loading") {
 		return (
 			<div className="container max-w-md mx-auto py-10">
-				<h2 className="text-2xl font-bold mb-4">Processing Your Order</h2>
-				<p className="mt-4 text-lg font-medium">
-					Please wait while we confirm your payment...
-				</p>
+				<div className="text-center">
+					<PaymentLoader />
+					<h2 className="text-2xl font-bold mt-6 mb-4">
+						Processing Your Order
+					</h2>
+					<p className="text-gray-600">
+						Please wait while we confirm your payment...
+					</p>
+				</div>
 			</div>
 		);
 	}
@@ -136,27 +153,39 @@ function CheckoutSuccess({
 	if (status === "failed") {
 		return (
 			<div className="container max-w-md mx-auto py-10">
-				<h2 className="text-2xl font-bold mb-4 text-red-600">Payment Failed</h2>
-				<p className="mt-4 text-lg text-red-500">{error}</p>
-				<p className="mt-2">Redirecting you back to your cart...</p>
+				<div className="text-center">
+					<XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+					<h2 className="text-2xl font-bold mb-4 text-red-600">
+						Payment Failed
+					</h2>
+					<p className="text-gray-600 mb-4">{error}</p>
+					<p className="text-sm text-gray-500">
+						Redirecting you to your cart...
+					</p>
+				</div>
 			</div>
 		);
 	}
 
 	return (
 		<div className="container max-w-md mx-auto py-10">
-			<h2 className="text-2xl font-bold mb-4 text-green-600">
-				Order Successful!
-			</h2>
-			{orderNumber && (
-				<p className="mt-4 text-lg">
-					Order Number: <span className="font-bold">{orderNumber}</span>
+			<div className="text-center">
+				<CheckCircle2 className="h-12 w-12 text-green-500 mx-auto mb-4" />
+				<h2 className="text-2xl font-bold mb-4 text-green-600">
+					Order Successful!
+				</h2>
+				{orderNumber && (
+					<p className="text-lg mb-4">
+						Order Number: <span className="font-bold">#{orderNumber}</span>
+					</p>
+				)}
+				<p className="text-gray-600 mb-4">
+					Thank you for your purchase! Your order has been confirmed.
 				</p>
-			)}
-			<p className="mt-4">
-				Thank you for your purchase! You will be redirected to your orders page
-				shortly.
-			</p>
+				<p className="text-sm text-gray-500 mb-8">
+					Redirecting to your orders...
+				</p>
+			</div>
 		</div>
 	);
 }

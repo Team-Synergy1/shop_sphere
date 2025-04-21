@@ -13,14 +13,14 @@ export async function GET(request) {
 
 		await connectDB();
 		const user = await User.findById(session.user.id).select("settings");
-console.log(user);
+
 		if (!user) {
 			return NextResponse.json({ error: "User not found" }, { status: 404 });
 		}
 
 		// Return default settings if none exist
 		const settings = user.settings || {
-			emailNotifications: {
+			notifications: {
 				orderUpdates: true,
 				promotions: true,
 				newsletter: false,
@@ -28,6 +28,10 @@ console.log(user);
 			privacy: {
 				shareOrderHistory: false,
 				shareWishlist: true,
+			},
+			preferences: {
+				language: "en",
+				currency: "USD",
 			},
 		};
 

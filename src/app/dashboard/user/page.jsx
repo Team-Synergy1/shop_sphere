@@ -221,7 +221,7 @@ export default function UserDashboard() {
 												{order?.status}
 											</div>
 											<p className="text-sm font-medium">
-												${order?.amount.toFixed(2)}
+												BDT.{order?.amount.toFixed(2)}
 											</p>
 											<Button variant="outline" size="sm" asChild>
 												<Link href={`/dashboard/user/orders/${order?.id}`}>
