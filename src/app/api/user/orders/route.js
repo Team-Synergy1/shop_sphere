@@ -17,8 +17,12 @@ export async function GET(request) {
 		const page = parseInt(searchParams.get("page") || "1");
 		const limit = parseInt(searchParams.get("limit") || "10");
 		const status = searchParams.get("status");
+		const userId = searchParams.get('userId');
 
-		const query = { user: session.user.id };
+
+
+		const query = {};
+		if (userId) query.user = userId;
 		if (status) query.status = status;
 
 		const skip = (page - 1) * limit;
