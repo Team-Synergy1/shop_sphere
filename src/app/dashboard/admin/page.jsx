@@ -1,11 +1,12 @@
 "use client"
 
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  Users, 
-  Store, 
-  ShoppingBag, 
-  Settings, 
+import {
+  Users,
+  Store,
+  ShoppingBag,
+  Settings,
   FileText,
   DollarSign,
   Layers
@@ -25,6 +26,7 @@ import {
   LineChart,
   Line,
 } from 'recharts';
+import axios from 'axios';
 
 const platformOverview = {
   totalUsers: 3854,
@@ -81,32 +83,46 @@ const topVendors = [
   },
 ];
 
-const recentUsers = [
-  {
-    id: 'USR-001',
-    name: 'Emma Thompson',
-    email: 'emma.t@example.com',
-    joinDate: '2025-03-18',
-    orders: 3,
-  },
-  {
-    id: 'USR-002',
-    name: 'Michael Scott',
-    email: 'michael.s@example.com',
-    joinDate: '2025-03-17',
-    orders: 1,
-  },
-  {
-    id: 'USR-003',
-    name: 'Sarah Johnson',
-    email: 'sarah.j@example.com',
-    joinDate: '2025-03-16',
-    orders: 5,
-  },
-];
+// const recentUsers = [
+//   {
+//     id: 'USR-001',
+//     name: 'Emma Thompson',
+//     email: 'emma.t@example.com',
+//     joinDate: '2025-03-18',
+//     orders: 3,
+//   },
+//   {
+//     id: 'USR-002',
+//     name: 'Michael Scott',
+//     email: 'michael.s@example.com',
+//     joinDate: '2025-03-17',
+//     orders: 1,
+//   },
+//   {
+//     id: 'USR-003',
+//     name: 'Sarah Johnson',
+//     email: 'sarah.j@example.com',
+//     joinDate: '2025-03-16',
+//     orders: 5,
+//   },
+// ];
 
 export default function AdminDashboard() {
+  const [recentUsers, setResentUsers] = useState([]);
 
+  useEffect(() => {
+    fetchUsers();
+  }, [])
+
+  const fetchUsers = async () => {
+    try {
+      const { data } = await axios.get('/api/auth/register');
+      const users = data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 4);
+      setResentUsers(users);
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
 
   return (
     <div>
@@ -274,7 +290,7 @@ export default function AdminDashboard() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader>
             <CardTitle>Recent Users</CardTitle>
@@ -282,8 +298,8 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentUsers.map((user) => (
-                <div key={user.id} className="flex items-center gap-3">
+              {recentUsers?.map((user) => (
+                <div key={user._id} className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
                     {user.name.charAt(0)}
                   </div>
@@ -292,7 +308,7 @@ export default function AdminDashboard() {
                     <p className="text-xs text-muted-foreground">{user.email}</p>
                   </div>
                   <Button variant="ghost" size="sm" asChild>
-                    <Link href={`/dashboard/admin/users/${user.id}`}>
+                    <Link href={`/dashboard/admin/users/${user._id}`}>
                       View
                     </Link>
                   </Button>
@@ -323,9 +339,9 @@ export default function AdminDashboard() {
                   <span className="text-sm">Active Vendors</span>
                   <span className="text-sm font-medium">{platformOverview.activeVendors}</span>
                 </div>
-                <Progress 
-                  value={(platformOverview.activeVendors / platformOverview.totalVendors) * 100} 
-                  className="mt-2 h-2" 
+                <Progress
+                  value={(platformOverview.activeVendors / platformOverview.totalVendors) * 100}
+                  className="mt-2 h-2"
                 />
               </div>
               <div>
@@ -333,9 +349,9 @@ export default function AdminDashboard() {
                   <span className="text-sm">Pending Approval</span>
                   <span className="text-sm font-medium">{platformOverview.pendingVendors}</span>
                 </div>
-                <Progress 
-                  value={(platformOverview.pendingVendors / platformOverview.totalVendors) * 100} 
-                  className="mt-2 h-2" 
+                <Progress
+                  value={(platformOverview.pendingVendors / platformOverview.totalVendors) * 100}
+                  className="mt-2 h-2"
                 />
               </div>
               <div className="rounded-lg border p-3">
@@ -353,7 +369,7 @@ export default function AdminDashboard() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader>
             <CardTitle>Category Performance</CardTitle>
@@ -397,7 +413,7 @@ export default function AdminDashboard() {
             </Button>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
