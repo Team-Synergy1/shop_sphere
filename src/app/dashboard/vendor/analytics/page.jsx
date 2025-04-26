@@ -81,6 +81,7 @@ export default function VendorAnalyticsPage() {
 				`/api/vendor/analytics?timeRange=${timeRange}`
 			);
 			const data = await response.json();
+   
 
 			if (!response.ok) {
 				throw new Error(data.error || "Failed to fetch analytics");
