@@ -347,20 +347,20 @@ export default function Navbar() {
 
 							{/* Notifications */}
 							{session && (
-								<Link
-									href="/notifications"
+								<div
+									
 									className="flex flex-col items-center p-1 text-gray-700 hover:text-orange-500  sm:flex"
 								>
 									<div className="relative">
 										<Bell size={24} />
 										<span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-											0
+										
 										</span>
 									</div>
 									<span className="text-xs hidden md:inline-block">
 										Notifications
 									</span>
-								</Link>
+								</div>
 							)}
 
 							{/* User dropdown */}
@@ -394,7 +394,7 @@ export default function Navbar() {
 												My Orders
 											</Link>
 										</DropdownMenuItem>
-										<DropdownMenuItem>
+										{/* <DropdownMenuItem>
 											<Link href="dashboard/user/returns" className="w-full">
 												My Returns
 											</Link>
@@ -413,7 +413,7 @@ export default function Navbar() {
 											<Link href="dashboard/user/vouchers" className="w-full">
 												My Vouchers
 											</Link>
-										</DropdownMenuItem>
+										</DropdownMenuItem> */}
 										{session.user.role === "user" && (
 											<DropdownMenuItem asChild className={"cursor-pointer"}>
 												<Link href="/dashboard/user">Dashboard</Link>
