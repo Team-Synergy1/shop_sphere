@@ -51,7 +51,7 @@ const categories = [
 	{ name: "Automotive", url: "/category/automotive" },
 ];
 
-// Optimize the useCartCount hook
+
 const useCartCount = () => {
 	const { data: session } = useSession();
 	const [cartItemCount, setCartItemCount] = useState(0);
@@ -82,10 +82,8 @@ const useCartCount = () => {
 			fetchCartItems(true);
 		}
 
-		// Less frequent polling - every 30 seconds
 		const intervalId = setInterval(() => fetchCartItems(), 30000);
 
-		// Use RAF for smoother updates
 		let frameId;
 		const handleStorageChange = (event) => {
 			if (event.key === "shopSphereCart") {
@@ -134,7 +132,7 @@ const useCartCount = () => {
 	return { cartItemCount, refreshCart: () => fetchCartItems(true) };
 };
 
-// Optimize the useWishlistCount hook
+
 const useWishlistCount = () => {
 	const { data: session } = useSession();
 	const [wishlistItemCount, setWishlistItemCount] = useState(0);
@@ -165,10 +163,9 @@ const useWishlistCount = () => {
 			fetchWishlistItems(true);
 		}
 
-		// Less frequent polling - every 30 seconds
 		const intervalId = setInterval(() => fetchWishlistItems(), 30000);
 
-		// Use RAF for smoother updates
+
 		let frameId;
 		const handleWishlistUpdate = (event) => {
 			if (event.detail && event.detail.wishlistItems) {
@@ -199,8 +196,8 @@ const useWishlistCount = () => {
 
 export default function Navbar() {
 	const { data: session } = useSession();
-	const { cartItemCount, refreshCart } = useCartCount();
-	const { wishlistItemCount, refreshWishlist } = useWishlistCount();
+	// const { cartItemCount, refreshCart } = useCartCount();
+	// const { wishlistItemCount, refreshWishlist } = useWishlistCount();
 	const pathName = usePathname();
 
 	const handleLogout = () => {
@@ -315,15 +312,15 @@ export default function Navbar() {
 							<Link
 								href="/cart"
 								className="flex flex-col items-center p-1 text-gray-700 hover:text-orange-500"
-								onClick={() => refreshCart()} // Refresh cart count when navigating to cart
+								// onClick={() => refreshCart()} // Refresh cart count when navigating to cart
 							>
 								<div className="relative">
 									<ShoppingCart size={24} />
-									{cartItemCount > 0 && (
+									{/* {cartItemCount > 0 && (
 										<span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
 											{cartItemCount > 99 ? "99+" : cartItemCount}
 										</span>
-									)}
+									)} */}
 								</div>
 								<span className="text-xs hidden md:inline-block">Cart</span>
 							</Link>
@@ -332,15 +329,15 @@ export default function Navbar() {
 							<Link
 								href="/dashboard/user/wishlist"
 								className="flex flex-col items-center p-1 text-gray-700 hover:text-orange-500"
-								onClick={() => refreshWishlist()} // Refresh wishlist count when navigating to wishlist
+								// onClick={() => refreshWishlist()} // Refresh wishlist count when navigating to wishlist
 							>
 								<div className="relative">
 									<Heart size={24} />
-									{wishlistItemCount > 0 && (
+									{/* {wishlistItemCount > 0 && (
 										<span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
 											{wishlistItemCount > 99 ? "99+" : wishlistItemCount}
 										</span>
-									)}
+									)} */}
 								</div>
 								<span className="text-xs hidden md:inline-block">Wishlist</span>
 							</Link>

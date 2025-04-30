@@ -57,7 +57,7 @@ export default function CartPage() {
 		}
 
 		fetchCart();
-	}, [session, status, router]);
+	}, []);
 
 	const updateItemQuantity = async (productId, newQuantity) => {
 		try {
@@ -243,7 +243,7 @@ export default function CartPage() {
 										<div className="mt-2 flex justify-between items-center">
 											<div className="flex items-center">
 												<p className="font-semibold mr-4">
-													 BDT{item.price.toFixed(2)}
+													BDT{item.price.toFixed(2)}
 												</p>
 
 												{/* Quantity controls */}
@@ -290,7 +290,7 @@ export default function CartPage() {
 										{/* Item subtotal */}
 										<div className="mt-2 text-right">
 											<p className="text-sm text-gray-500">
-												Subtotal:  BDT
+												Subtotal: BDT
 												{((item.price || 0) * (item.quantity || 1)).toFixed(2)}
 											</p>
 										</div>

@@ -1,12 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    reactStrictMode: true,
-    turbopack: {
-        resolveExtensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
-        resolveAlias: {
-            '@/*': './src/*'
-        }
-    }
+	reactStrictMode: true,
+	// Ignore certificates folder to prevent unnecessary Fast Refresh
+	watchOptions: {
+		ignored: ["**/certificates/**"],
+	},
 };
 
 export default nextConfig;

@@ -35,11 +35,11 @@ const WishlistPage = () => {
 		};
 
 		fetchWishlist();
-	}, [status]);
+	}, []);
 
 	const handleAddAllToCart = async () => {
-		const inStockItems = wishlistItems.filter(item => item.inStock);
-		
+		const inStockItems = wishlistItems.filter((item) => item.inStock);
+
 		if (inStockItems.length === 0) {
 			toast.error("No in-stock items to add to cart");
 			return;
@@ -68,7 +68,7 @@ const WishlistPage = () => {
 	const handleRemoveFromWishlist = async (productId) => {
 		try {
 			await axios.post("/api/user/wishlist/toggle", { productId });
-			
+
 			setWishlistItems(wishlistItems.filter((item) => item._id !== productId));
 		} catch (err) {
 			console.error("Error removing from wishlist:", err);

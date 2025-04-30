@@ -98,60 +98,14 @@ export default function AddProductPage() {
 	}, []);
 
 	const categories = [
-		{
-			id: "electronics",
-			name: "Electronics",
-			subcategories: [
-				"Smartphones",
-				"Laptops",
-				"Audio",
-				"Accessories",
-				"Wearables",
-			],
-		},
-		{
-			id: "clothing",
-			name: "Clothing",
-			subcategories: ["Men", "Women", "Kids", "Activewear", "Shoes"],
-		},
-		{
-			id: "home",
-			name: "Home & Kitchen",
-			subcategories: [
-				"Furniture",
-				"Appliances",
-				"Cookware",
-				"Decor",
-				"Bedding",
-			],
-		},
-		{
-			id: "beauty",
-			name: "Beauty & Personal Care",
-			subcategories: [
-				"Skincare",
-				"Makeup",
-				"Haircare",
-				"Fragrance",
-				"Bath & Body",
-			],
-		},
-		{
-			id: "books",
-			name: "Books & Media",
-			subcategories: [
-				"Fiction",
-				"Non-fiction",
-				"Textbooks",
-				"Magazines",
-				"Audiobooks",
-			],
-		},
-		{
-			id: "sports",
-			name: "Sports & Outdoors",
-			subcategories: ["Equipment", "Clothing", "Shoes", "Camping", "Fitness"],
-		},
+		{ id: "electronics", name: "Electronics", subcategories: [] },
+		{ id: "fashion", name: "Fashion", subcategories: [] },
+		{ id: "home", name: "Home", subcategories: [] },
+		{ id: "beauty", name: "Beauty", subcategories: [] },
+		{ id: "baby-toys", name: "Baby & Toys", subcategories: [] },
+		{ id: "groceries", name: "Groceries", subcategories: [] },
+		{ id: "sports-outdoors", name: "Sports & Outdoors", subcategories: [] },
+		{ id: "automotive", name: "Automotive", subcategories: [] },
 	];
 
 	const form = useForm({
@@ -184,7 +138,7 @@ export default function AddProductPage() {
 		setShowSubcategories(
 			category && category.subcategories && category.subcategories.length > 0
 		);
-	}, [selectedCategory, form]);
+	}, [selectedCategory, form, categories]);
 
 	// add color
 	const addColor = () => {
@@ -548,7 +502,6 @@ export default function AddProductPage() {
 								</CardContent>
 							</Card>
 						</TabsContent>
-
 						<TabsContent value="details" className="space-y-6">
 							<Card>
 								<CardHeader>
