@@ -123,7 +123,6 @@ export default function ProductListingPage() {
 		fetchProducts();
 	}, []);
 
-	// Handler functions for ProductFilters
 	const handleCategoryChange = (category) => {
 		if (!category) {
 			setSelectedCategories([]);
