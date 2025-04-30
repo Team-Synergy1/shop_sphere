@@ -4,7 +4,7 @@ const nextConfig = {
 	// Optimize page bundles
 	poweredByHeader: false,
 	compress: true,
-	// Only apply webpack config when not using Turbopack
+	
 	...(process.env.TURBOPACK
 		? {}
 		: {
@@ -14,7 +14,7 @@ const nextConfig = {
 						"@": "./src",
 					};
 
-					// Optimize development rebuilds
+					
 					if (dev && !isServer) {
 						config.watchOptions = {
 							...config.watchOptions,
