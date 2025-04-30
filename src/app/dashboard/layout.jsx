@@ -88,23 +88,23 @@ export default function DashboardLayout({ children }) {
 					icon: <CreditCard className="h-5 w-5" />,
 					label: "Payment Methods",
 				},
-				{
-					href: "/dashboard/user/reviews",
-					icon: <Star className="h-5 w-5" />,
-					label: "Reviews",
-				},
+				// {
+				// 	href: "/dashboard/user/reviews",
+				// 	icon: <Star className="h-5 w-5" />,
+				// 	label: "Reviews",
+				// },
 				{
 					href: "/dashboard/user/profile",
 					icon: <User className="h-5 w-5" />,
 					label: "Profile",
 				},
-				 {
+				{
 					href: "/dashboard/user/settings",
 					icon: <Settings className="h-5 w-5" />,
-					
+
 					label: "Settings",
-				  },
-			]
+				},
+			],
 		},
 		vendor: {
 			title: "Vendor Dashboard",
@@ -123,6 +123,11 @@ export default function DashboardLayout({ children }) {
 					href: "/dashboard/vendor/orders",
 					icon: <ShoppingCart className="h-5 w-5" />,
 					label: "Orders",
+				},
+				{
+					href: "/dashboard/vendor/reviews",
+					icon: <Star className="h-5 w-5" />,
+					label: "Reviews",
 				},
 				{
 					href: "/dashboard/vendor/analytics",
@@ -149,7 +154,7 @@ export default function DashboardLayout({ children }) {
 					icon: <Settings className="h-5 w-5" />,
 					label: "Store Settings",
 				},
-			]
+			],
 		},
 		admin: {
 			title: "Admin Dashboard",
@@ -199,8 +204,8 @@ export default function DashboardLayout({ children }) {
 					icon: <Settings className="h-5 w-5" />,
 					label: "Settings",
 				},
-			]
-		}
+			],
+		},
 	};
 
 	// Determine current user role and get navigation items
@@ -208,9 +213,7 @@ export default function DashboardLayout({ children }) {
 	const { title, items: navItems } = navigationConfig[role];
 
 	if (status === "loading") {
-		return (
-			<Loader></Loader>
-		);
+		return <Loader></Loader>;
 	}
 
 	return (
@@ -278,13 +281,17 @@ export default function DashboardLayout({ children }) {
 
 			{/* Main Content Area - Adjusted for fixed sidebar on different screens */}
 			<div className="flex-1 flex flex-col h-screen md:ml-16 lg:ml-64">
-				 {/* Fixed Top Header */}
+				{/* Fixed Top Header */}
 				<header className="fixed top-0 right-0 md:right-0 left-0 md:left-16 lg:left-64 z-30 h-16 bg-background border-b shadow-sm flex items-center justify-between px-4 md:px-6">
 					{/* Mobile Menu Button and Logo */}
 					<div className="flex items-center md:hidden">
 						<Sheet>
 							<SheetTrigger asChild>
-								<Button variant="ghost" size="icon" className="mr-2 cursor-pointer">
+								<Button
+									variant="ghost"
+									size="icon"
+									className="mr-2 cursor-pointer"
+								>
 									<Menu className="h-6 w-6" />
 									<span className="sr-only">Toggle menu</span>
 								</Button>
@@ -293,7 +300,9 @@ export default function DashboardLayout({ children }) {
 								<SheetHeader className="h-16 border-b">
 									<SheetTitle className="flex items-center">
 										<ShoppingBag className="h-6 w-6 text-primary mr-2" />
-										<span className="text-xl font-bold text-primary">ShopSphere</span>
+										<span className="text-xl font-bold text-primary">
+											ShopSphere
+										</span>
 									</SheetTitle>
 								</SheetHeader>
 
@@ -359,9 +368,7 @@ export default function DashboardLayout({ children }) {
 
 				{/* Main Content - With proper spacing and scrolling */}
 				<main className="flex-1 overflow-y-auto pt-16">
-					<div className="p-4 md:p-6">
-						{children}
-					</div>
+					<div className="p-4 md:p-6">{children}</div>
 				</main>
 			</div>
 		</div>
@@ -372,7 +379,10 @@ function UserNav({ userInfo }) {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<Button variant="ghost" className="relative h-9 w-9 rounded-full cursor-pointer p-0">
+				<Button
+					variant="ghost"
+					className="relative h-9 w-9 rounded-full cursor-pointer p-0"
+				>
 					<Avatar className="h-9 w-9">
 						<AvatarImage src={userInfo?.image || ""} alt={userInfo?.name} />
 						<AvatarFallback className="bg-primary/10 text-primary">
@@ -396,7 +406,7 @@ function UserNav({ userInfo }) {
 					</Link>
 				</DropdownMenuItem>
 				<DropdownMenuItem asChild>
-					<Link href="/settings" className="cursor-pointer">
+					<Link href="user/settings" className="cursor-pointer">
 						<Settings className="mr-2 h-4 w-4" />
 						Settings
 					</Link>

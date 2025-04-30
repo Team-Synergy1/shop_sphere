@@ -9,6 +9,7 @@ import Loader from "../loading";
 import { loadStripe } from "@stripe/stripe-js";
 import useProduct from "@/hooks/useProduct";
 import PurchaseButton from "@/components/PurchaseButton";
+import { useCartStore } from "@/store/useCartStore";
 
 export default function CartPage() {
 	const [cartItems, setCartItems] = useState([]);
@@ -17,6 +18,7 @@ export default function CartPage() {
 	const { data: session, status } = useSession();
 	const router = useRouter();
 	const [products] = useProduct();
+	const fetchCartCount = useCartStore((state) => state.fetchCartCount);
 
 	//  subtotal based on price * quantity
 	const subtotal = cartItems.reduce((total, item) => {
@@ -106,6 +108,9 @@ export default function CartPage() {
 
 			toast.success("Product removed successfully");
 			setCartItems(cartItems.filter((item) => item._id !== productId));
+
+			// Update cart count in Zustand store
+			fetchCartCount();
 		} catch (err) {
 			console.error("Error removing item:", err);
 			toast.error("Failed to remove item. Please try again.");

@@ -6,6 +6,7 @@ import { SessionProvider } from "next-auth/react";
 import QueryProvider from "@/providers/QueryProvider";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { ShoppingProvider } from "@/context/ShoppingContext";
 
 export default function RootLayout({ children }) {
 	return (
@@ -13,12 +14,12 @@ export default function RootLayout({ children }) {
 			<body>
 				<SessionProvider>
 					<QueryProvider>
-						
+						<ShoppingProvider>
 							<Navbar />
 							{children}
 							<Footer />
 							<Toaster />
-						
+						</ShoppingProvider>
 					</QueryProvider>
 				</SessionProvider>
 			</body>

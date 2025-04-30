@@ -7,12 +7,14 @@ import Link from "next/link";
 import Head from "next/head";
 import { Trash2, AlertCircle, Heart } from "lucide-react";
 import AddToCart from "@/components/share/addToCart";
+import { useCartStore } from "@/store/useCartStore";
 
 const WishlistPage = () => {
 	const { data: session, status } = useSession();
 	const [wishlistItems, setWishlistItems] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
+	const fetchWishlistCount = useCartStore((state) => state.fetchWishlistCount);
 
 	useEffect(() => {
 		const fetchWishlist = async () => {
@@ -68,11 +70,12 @@ const WishlistPage = () => {
 	const handleRemoveFromWishlist = async (productId) => {
 		try {
 			await axios.post("/api/user/wishlist/toggle", { productId });
-
 			setWishlistItems(wishlistItems.filter((item) => item._id !== productId));
+			// Update wishlist count in Zustand store
+			fetchWishlistCount();
 		} catch (err) {
 			console.error("Error removing from wishlist:", err);
-			toast.error("Failed to remove item from wishlist");
+			alert("Failed to remove item from wishlist");
 		}
 	};
 
