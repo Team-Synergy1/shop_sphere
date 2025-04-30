@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
+import { useCartStore } from "@/store/useCartStore";
 
 export default function AddToCart({ id, size, className = "", onAddedToCart }) {
 	const [isAdded, setIsAdded] = useState(false);
@@ -15,6 +16,7 @@ export default function AddToCart({ id, size, className = "", onAddedToCart }) {
 
 	const [products] = useProduct();
 	const product = products?.find((p) => p._id == id);
+	const fetchCartCount = useCartStore((state) => state.fetchCartCount);
 
 	const handleAddToCart = async () => {
 		if (status === "unauthenticated") {
@@ -41,6 +43,9 @@ export default function AddToCart({ id, size, className = "", onAddedToCart }) {
 				const successMsg = wasUpdated
 					? `Updated quantity to ${newQuantity}`
 					: "Added to cart!";
+
+				// Update cart count in Zustand store
+				fetchCartCount();
 
 				setTimeout(() => {
 					setIsAdded(false);

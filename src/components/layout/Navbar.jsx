@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React from "react";
 import Link from "next/link";
 import {
 	Search,
@@ -38,6 +38,7 @@ import {
 import { Separator } from "../ui/separator";
 
 import { usePathname } from "next/navigation";
+import { useCartStore } from "@/store/useCartStore";
 
 const categories = [
 	{ name: "Products", url: "/products" },
@@ -51,156 +52,12 @@ const categories = [
 	{ name: "Automotive", url: "/category/automotive" },
 ];
 
-// Optimize the useCartCount hook
-const useCartCount = () => {
-	const { data: session } = useSession();
-	const [cartItemCount, setCartItemCount] = useState(0);
-	const lastFetchTime = useRef(0);
-
-	const fetchCartItems = useCallback(
-		async (force = false) => {
-			if (!session?.user) return;
-
-			const now = Date.now();
-			if (!force && now - lastFetchTime.current < 2000) return;
-
-			try {
-				lastFetchTime.current = now;
-				const response = await fetch("/api/addCart");
-				const data = await response.json();
-				setCartItemCount(data?.cart?.length || 0);
-			} catch (error) {
-				console.error("Failed to fetch cart items:", error);
-				setCartItemCount(0);
-			}
-		},
-		[session]
-	);
-
-	useEffect(() => {
-		if (session?.user) {
-			fetchCartItems(true);
-		}
-
-		// Less frequent polling - every 30 seconds
-		const intervalId = setInterval(() => fetchCartItems(), 30000);
-
-		// Use RAF for smoother updates
-		let frameId;
-		const handleStorageChange = (event) => {
-			if (event.key === "shopSphereCart") {
-				cancelAnimationFrame(frameId);
-				frameId = requestAnimationFrame(() => {
-					try {
-						if (event.newValue) {
-							const newCart = JSON.parse(event.newValue);
-							setCartItemCount(newCart?.cart?.length || 0);
-						} else {
-							setCartItemCount(0);
-						}
-					} catch (e) {
-						console.error("Error parsing cart data:", e);
-					}
-				});
-			}
-		};
-
-		const handleCartUpdate = (event) => {
-			if (event.detail && event.detail.cartItems) {
-				cancelAnimationFrame(frameId);
-				frameId = requestAnimationFrame(() => {
-					setCartItemCount(event.detail.cartItems.length || 0);
-				});
-			} else {
-				fetchCartItems();
-			}
-		};
-
-		if (typeof window !== "undefined") {
-			window.addEventListener("storage", handleStorageChange);
-			window.addEventListener("cartUpdated", handleCartUpdate);
-		}
-
-		return () => {
-			clearInterval(intervalId);
-			cancelAnimationFrame(frameId);
-			if (typeof window !== "undefined") {
-				window.removeEventListener("storage", handleStorageChange);
-				window.removeEventListener("cartUpdated", handleCartUpdate);
-			}
-		};
-	}, [session, fetchCartItems]);
-
-	return { cartItemCount, refreshCart: () => fetchCartItems(true) };
-};
-
-// Optimize the useWishlistCount hook
-const useWishlistCount = () => {
-	const { data: session } = useSession();
-	const [wishlistItemCount, setWishlistItemCount] = useState(0);
-	const lastFetchTime = useRef(0);
-
-	const fetchWishlistItems = useCallback(
-		async (force = false) => {
-			if (!session?.user) return;
-
-			const now = Date.now();
-			if (!force && now - lastFetchTime.current < 2000) return;
-
-			try {
-				lastFetchTime.current = now;
-				const response = await fetch("/api/user/wishlist");
-				const data = await response.json();
-				setWishlistItemCount(data?.wishlist?.length || 0);
-			} catch (error) {
-				console.error("Failed to fetch wishlist items:", error);
-				setWishlistItemCount(0);
-			}
-		},
-		[session]
-	);
-
-	useEffect(() => {
-		if (session?.user) {
-			fetchWishlistItems(true);
-		}
-
-		// Less frequent polling - every 30 seconds
-		const intervalId = setInterval(() => fetchWishlistItems(), 30000);
-
-		// Use RAF for smoother updates
-		let frameId;
-		const handleWishlistUpdate = (event) => {
-			if (event.detail && event.detail.wishlistItems) {
-				cancelAnimationFrame(frameId);
-				frameId = requestAnimationFrame(() => {
-					setWishlistItemCount(event.detail.wishlistItems.length || 0);
-				});
-			} else {
-				fetchWishlistItems();
-			}
-		};
-
-		if (typeof window !== "undefined") {
-			window.addEventListener("wishlistUpdated", handleWishlistUpdate);
-		}
-
-		return () => {
-			clearInterval(intervalId);
-			cancelAnimationFrame(frameId);
-			if (typeof window !== "undefined") {
-				window.removeEventListener("wishlistUpdated", handleWishlistUpdate);
-			}
-		};
-	}, [session, fetchWishlistItems]);
-
-	return { wishlistItemCount, refreshWishlist: () => fetchWishlistItems(true) };
-};
-
 export default function Navbar() {
 	const { data: session } = useSession();
-	const { cartItemCount, refreshCart } = useCartCount();
-	const { wishlistItemCount, refreshWishlist } = useWishlistCount();
+	const cartCount = useCartStore((state) => state.cartCount);
+	const wishlistCount = useCartStore((state) => state.wishlistCount);
+	const fetchCartCount = useCartStore((state) => state.fetchCartCount);
+	const fetchWishlistCount = useCartStore((state) => state.fetchWishlistCount);
 	const pathName = usePathname();
 
 	const handleLogout = () => {
@@ -315,13 +172,13 @@ export default function Navbar() {
 							<Link
 								href="/cart"
 								className="flex flex-col items-center p-1 text-gray-700 hover:text-orange-500"
-								onClick={() => refreshCart()} // Refresh cart count when navigating to cart
+								onClick={() => fetchCartCount()} // Refresh cart count when navigating to cart
 							>
 								<div className="relative">
 									<ShoppingCart size={24} />
-									{cartItemCount > 0 && (
+									{cartCount > 0 && (
 										<span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-											{cartItemCount > 99 ? "99+" : cartItemCount}
+											{cartCount > 99 ? "99+" : cartCount}
 										</span>
 									)}
 								</div>
@@ -332,13 +189,13 @@ export default function Navbar() {
 							<Link
 								href="/dashboard/user/wishlist"
 								className="flex flex-col items-center p-1 text-gray-700 hover:text-orange-500"
-								onClick={() => refreshWishlist()} // Refresh wishlist count when navigating to wishlist
+								onClick={() => fetchWishlistCount()} // Refresh wishlist count when navigating to wishlist
 							>
 								<div className="relative">
 									<Heart size={24} />
-									{wishlistItemCount > 0 && (
+									{wishlistCount > 0 && (
 										<span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-											{wishlistItemCount > 99 ? "99+" : wishlistItemCount}
+											{wishlistCount > 99 ? "99+" : wishlistCount}
 										</span>
 									)}
 								</div>
@@ -347,15 +204,10 @@ export default function Navbar() {
 
 							{/* Notifications */}
 							{session && (
-								<div
-									
-									className="flex flex-col items-center p-1 text-gray-700 hover:text-orange-500  sm:flex"
-								>
+								<div className="flex flex-col items-center p-1 text-gray-700 hover:text-orange-500  sm:flex">
 									<div className="relative">
 										<Bell size={24} />
-										<span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-										
-										</span>
+										<span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center"></span>
 									</div>
 									<span className="text-xs hidden md:inline-block">
 										Notifications
