@@ -36,7 +36,7 @@ import {
 	SheetTrigger,
 } from "@/components/ui/sheet";
 import { Separator } from "../ui/separator";
-
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { usePathname } from "next/navigation";
 import { useCartStore } from "@/store/useCartStore";
 
@@ -221,13 +221,14 @@ export default function Navbar() {
 									<DropdownMenuTrigger asChild>
 										<Button
 											variant="ghost"
-											className="flex flex-col items-center p-1 h-auto"
+											className="relative h-9 w-9 rounded-full cursor-pointer p-0"
 										>
-											<User size={24} />
-											<span className="text-xs items-center hidden md:flex">
-												{session && session.user.name}{" "}
-												<ChevronDown size={12} className="ml-1" />
-											</span>
+											<Avatar className="h-9 w-9">
+												<AvatarImage src={session.user?.image || ""} alt={session.user?.name} />
+												<AvatarFallback className="bg-primary/10 text-primary">
+													{session.user?.name?.charAt(0)}
+												</AvatarFallback>
+											</Avatar>
 										</Button>
 									</DropdownMenuTrigger>
 									<DropdownMenuContent align="end" className="w-56">

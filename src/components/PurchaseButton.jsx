@@ -78,7 +78,7 @@ export default function PurchaseButton({ productId, className }) {
 			disabled={loading}
 			variant="secondary"
 			size="lg"
-			className={cn("w-full md:w-auto", className)}
+			className={cn("md:w-auto", className)}
 		>
 			{loading ? loadingText : buttonText}
 		</Button>
