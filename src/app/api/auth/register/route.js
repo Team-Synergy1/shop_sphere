@@ -33,6 +33,7 @@ export async function POST(request) {
 			email,
 			password: hashedPassword,
 			role: role || "user",
+			status: 'active',
 		});
 
 		await newUser.save();

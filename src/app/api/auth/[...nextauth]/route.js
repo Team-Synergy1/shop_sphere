@@ -30,6 +30,11 @@ export const authOptions = {
 					throw new Error("No user found with this email");
 				}
 
+				// Check if account is suspended
+				if (user.status == "suspended") {
+					throw new Error("Account is suspended. Contact to support team");
+				}
+
 				// Check if account is locked
 				if (user.lockUntil && new Date(user.lockUntil).getTime() > Date.now()) {
 					throw new Error("Account locked. Try again later.");
@@ -98,6 +103,7 @@ export const authOptions = {
 							),
 							role: "user", // Default role for Google users
 							image: user.image,
+							status: "active",
 						});
 
 						await newUser.save();
