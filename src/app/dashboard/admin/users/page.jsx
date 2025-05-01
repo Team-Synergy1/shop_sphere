@@ -53,6 +53,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from 'sonner';
 
 export default function AdminUsers() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -141,6 +142,7 @@ export default function AdminUsers() {
   const handleDeleteUser = async (id) => {
     try {
       await axios.delete(`/api/user/${id}`);
+      toast.success('User deleted successfully');
       // Refresh the users list after deletion
       fetchUsers();
     } catch (err) {
@@ -152,6 +154,7 @@ export default function AdminUsers() {
   const updateStatus = async (id, status) => {
     try {
       await axios.patch(`/api/user/${id}`, { status });
+      toast.success(`User status updated to ${status}`);
       // Refresh users list after update
       fetchUsers();
     } catch (err) {
@@ -163,6 +166,7 @@ export default function AdminUsers() {
   const handleRoleChange = async (id, role) => {
     try {
       await axios.patch(`/api/user/${id}`, { role });
+      toast.success(`User role updated to ${role}`);
       // Refresh users list after update
       fetchUsers();
     } catch (err) {
@@ -183,101 +187,54 @@ export default function AdminUsers() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
-        {loading ? (
-          <>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <Skeleton className="h-5 w-24" />
-                <Skeleton className="h-4 w-4 rounded-full" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-8 w-16 mb-1" />
-                <Skeleton className="h-4 w-28" />
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <Skeleton className="h-5 w-24" />
-                <Skeleton className="h-4 w-4 rounded-full" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-8 w-16 mb-1" />
-                <Skeleton className="h-4 w-28" />
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <Skeleton className="h-5 w-24" />
-                <Skeleton className="h-4 w-4 rounded-full" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-8 w-16 mb-1" />
-                <Skeleton className="h-4 w-28" />
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <Skeleton className="h-5 w-24" />
-                <Skeleton className="h-4 w-4 rounded-full" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-8 w-16 mb-1" />
-                <Skeleton className="h-4 w-28" />
-              </CardContent>
-            </Card>
-          </>
-        ) : (
-          <>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{userData.stats?.total || 0}</div>
-                <p className="text-xs text-muted-foreground">
-                  +{userData.stats?.newThisMonth || 0} this month
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Active Users</CardTitle>
-                <CheckCircle className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{userData.stats?.active || 0}</div>
-                <p className="text-xs text-muted-foreground">
-                  {userData.stats ? ((userData.stats.active / userData.stats.total) * 100).toFixed(1) : 0}% of total users
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Inactive Users</CardTitle>
-                <XCircle className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{userData.stats?.inactive || 0}</div>
-                <p className="text-xs text-muted-foreground">
-                  No login in 30+ days
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Suspended Users</CardTitle>
-                <Shield className="h-4 w-4" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{userData.stats?.suspended || 0}</div>
-                <p className="text-xs text-muted-foreground">
-                  Access temporarily revoked
-                </p>
-              </CardContent>
-            </Card>
-          </>
-        )}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{userData.stats?.total || 0}</div>
+            <p className="text-xs text-muted-foreground">
+              +{userData.stats?.newThisMonth || 0} this month
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Active Users</CardTitle>
+            <CheckCircle className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{userData.stats?.active || 0}</div>
+            <p className="text-xs text-muted-foreground">
+              {userData.stats ? ((userData.stats.active / userData.stats.total) * 100).toFixed(1) : 0}% of total users
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Inactive Users</CardTitle>
+            <XCircle className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{userData.stats?.inactive || 0}</div>
+            <p className="text-xs text-muted-foreground">
+              No login in 30+ days
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Suspended Users</CardTitle>
+            <Shield className="h-4 w-4" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{userData.stats?.suspended || 0}</div>
+            <p className="text-xs text-muted-foreground">
+              Access temporarily revoked
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       <Card>
