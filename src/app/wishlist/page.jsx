@@ -8,6 +8,7 @@ import Head from "next/head";
 import { Trash2, AlertCircle, Heart } from "lucide-react";
 import AddToCart from "@/components/share/addToCart";
 import { useCartStore } from "@/store/useCartStore";
+import { toast } from "sonner";
 
 const WishlistPage = () => {
 	const { data: session, status } = useSession();
