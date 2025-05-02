@@ -29,6 +29,7 @@ import { useParams } from "next/navigation";
 import Loader from "@/app/loading";
 import WishlistButton from "@/components/share/WislistButton";
 import PurchaseButton from "@/components/PurchaseButton";
+import CompareButton from "@/components/CompareButton";
 
 export default function ProductPage() {
 	const { data: session } = useSession();
@@ -233,6 +234,7 @@ export default function ProductPage() {
 					<div className="flex space-x-4 mb-6">
 						<AddToCart id={product._id} size="lg" />
 						<PurchaseButton productId={product._id} />
+						<CompareButton productId={product._id} />
 					</div>
 
 					{/* Vendor Chat Button */}

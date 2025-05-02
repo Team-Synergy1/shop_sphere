@@ -273,6 +273,18 @@ export default function Navbar() {
 												My Orders
 											</Link>
 										</DropdownMenuItem>
+
+										<DropdownMenuItem>
+											<Link href="compare" className="w-full">
+												Compare products
+											</Link>
+										</DropdownMenuItem>
+										{/* <DropdownMenuItem>
+											<Link href="dashboard/user/returns" className="w-full">
+												My Returns
+											</Link>
+										</DropdownMenuItem>
+
 										<DropdownMenuItem>
 											<Link href="/chat" className="w-full flex items-center gap-2">
 												<MessageSquare className="h-4 w-4" />
