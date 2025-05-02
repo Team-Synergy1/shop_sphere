@@ -25,6 +25,29 @@ const OrderItemSchema = new mongoose.Schema({
 	},
 });
 
+const CouponDetailsSchema = new mongoose.Schema(
+	{
+		code: {
+			type: String,
+			required: true,
+		},
+		discountType: {
+			type: String,
+			enum: ["percentage", "fixed"],
+			required: true,
+		},
+		discountValue: {
+			type: Number,
+			required: true,
+		},
+		discountAmount: {
+			type: Number,
+			required: true,
+		},
+	},
+	{ _id: false }
+);
+
 const OrderSchema = new mongoose.Schema(
 	{
 		user: {
@@ -38,10 +61,19 @@ const OrderSchema = new mongoose.Schema(
 			unique: true,
 		},
 		items: [OrderItemSchema],
+		subtotalAmount: {
+			type: Number,
+			required: true,
+		},
+		discountAmount: {
+			type: Number,
+			default: 0,
+		},
 		totalAmount: {
 			type: Number,
 			required: true,
 		},
+		coupon: CouponDetailsSchema,
 		shippingAddress: {
 			street: { type: String },
 			city: { type: String },

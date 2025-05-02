@@ -10,6 +10,7 @@ import {
 	ShoppingCart,
 	Truck,
 	Check,
+	MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,6 +21,7 @@ import Link from "next/link";
 import useProduct from "@/hooks/useProduct";
 
 import AddToCart from "@/components/share/addToCart";
+import ChatWithVendorButton from "@/components/share/ChatWithVendorButton";
 
 import axios from "axios";
 import { useSession } from "next-auth/react";
@@ -232,6 +234,25 @@ export default function ProductPage() {
 						<AddToCart id={product._id} size="lg" />
 						<PurchaseButton productId={product._id} />
 					</div>
+
+					{/* Vendor Chat Button */}
+					{product.vendor && (
+						<Card className="bg-gray-50 mt-4">
+							<CardContent className="pt-4 pb-4">
+								<div className="flex flex-col space-y-3">
+									<div className="flex items-center space-x-2">
+										<Badge variant="outline">Vendor</Badge>
+										<h3 className="font-medium">{product.vendor.name || "Shop Vendor"}</h3>
+									</div>
+									<ChatWithVendorButton 
+										vendorId={product.vendor._id} 
+										vendorName={product.vendor.name || "Vendor"} 
+										className="w-full"
+									/>
+								</div>
+							</CardContent>
+						</Card>
+					)}
 
 					{/* Shipping Info
           <Card className="bg-gray-50">

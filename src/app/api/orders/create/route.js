@@ -5,6 +5,7 @@ import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 import Order from "@/models/Order";
 import Product from "@/models/Product";
+import Coupon from "@/models/Coupon";
 import Stripe from "stripe";
 
 import mongoose from "mongoose";
@@ -28,7 +29,8 @@ export async function POST(request) {
 			return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
 		}
 
-		const { paymentMethod, isCashOnDelivery, sessionId } = await request.json();
+		const { paymentMethod, isCashOnDelivery, sessionId, couponCode } =
+			await request.json();
 
 		// Check stock availability and update products
 		for (const item of user.cart) {
@@ -51,7 +53,7 @@ export async function POST(request) {
 		}
 
 		let formattedItems = [];
-		let totalAmount = 0;
+		let subtotalAmount = 0;
 
 		// Update stock and format order items
 		for (const item of user.cart) {
@@ -72,8 +74,54 @@ export async function POST(request) {
 				subtotal: item.price * (item.quantity || 1),
 			});
 
-			totalAmount += item.price * (item.quantity || 1);
+			subtotalAmount += item.price * (item.quantity || 1);
 		}
+
+		// Handle coupon if provided
+		let discountAmount = 0;
+		let appliedCoupon = null;
+
+		if (couponCode) {
+			// Find and validate the coupon
+			const coupon = await Coupon.findOne({
+				code: { $regex: new RegExp(`^${couponCode}$`, "i") },
+				isActive: true,
+				startDate: { $lte: new Date() },
+				endDate: { $gte: new Date() },
+			});
+
+			if (coupon) {
+				// Check minimum purchase requirement
+				if (subtotalAmount >= coupon.minPurchase) {
+					// Calculate discount
+					if (coupon.discountType === "percentage") {
+						discountAmount = (subtotalAmount * coupon.discountValue) / 100;
+
+						// Apply maximum discount cap if set
+						if (coupon.maxDiscount !== null) {
+							discountAmount = Math.min(discountAmount, coupon.maxDiscount);
+						}
+					} else {
+						// Fixed amount discount
+						discountAmount = Math.min(coupon.discountValue, subtotalAmount);
+					}
+
+					// Update coupon usage
+					coupon.currentUsage += 1;
+					await coupon.save();
+
+					appliedCoupon = {
+						code: coupon.code,
+						discountType: coupon.discountType,
+						discountValue: coupon.discountValue,
+						discountAmount: discountAmount,
+					};
+				}
+			}
+		}
+
+		// Calculate final amount after discount
+		const totalAmount = Math.max(subtotalAmount - discountAmount, 0);
 
 		// Generate order number
 		const orderNumber = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
@@ -98,7 +146,17 @@ export async function POST(request) {
 			user: user._id,
 			orderNumber: orderNumber,
 			items: formattedItems,
+			subtotalAmount: subtotalAmount,
+			discountAmount: discountAmount,
 			totalAmount: totalAmount,
+			coupon: appliedCoupon
+				? {
+						code: appliedCoupon.code,
+						discountType: appliedCoupon.discountType,
+						discountValue: appliedCoupon.discountValue,
+						discountAmount: appliedCoupon.discountAmount,
+				  }
+				: null,
 			shippingAddress: {
 				street: defaultAddress.street,
 				city: defaultAddress.city,
@@ -121,7 +179,9 @@ export async function POST(request) {
 			success: true,
 			message: "Order created successfully",
 			orderNumber: order.orderNumber,
-			order: order,
+			id: order._id,
+			discount: discountAmount,
+			total: totalAmount,
 		});
 	} catch (error) {
 		console.error("Create order error:", error);

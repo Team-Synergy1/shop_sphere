@@ -17,9 +17,10 @@ async function getUserFromSession(session) {
 		return { error: "User not found.", status: 404 };
 	}
 
-	if (user.role === "vendor" || user.role === "admin") {
-		return { error: "Only regular users can access cart", status: 403 };
-	}
+	// Remove this check to allow all users to access their cart
+	// if (user.role === "vendor" || user.role === "admin") {
+	// 	return { error: "Only regular users can access cart", status: 403 };
+	// }
 
 	return { user };
 }
@@ -45,36 +46,38 @@ export async function POST(req) {
 			);
 		}
 
-		// Use atomic operation to remove item from cart
-		const updatedUser = await User.findOneAndUpdate(
-			{ _id: userResult.user._id },
-			{
-				$pull: {
-					cart: {
-						$or: [
-							{ _id: productId },
-							{
-								_id: mongoose.Types.ObjectId.isValid(productId)
-									? new mongoose.Types.ObjectId(productId)
-									: productId,
-							},
-						],
-					},
-				},
-			},
-			{ new: true }
+		const user = userResult.user;
+
+		// Improved product ID comparison to handle both string and ObjectId formats
+		let productIdToRemove = productId;
+		// Convert to ObjectId if it's a valid ObjectId string
+		if (mongoose.Types.ObjectId.isValid(productId)) {
+			productIdToRemove = new mongoose.Types.ObjectId(productId);
+		}
+
+		// Find the cart item with the matching product ID
+		const cartItemIndex = user.cart.findIndex(
+			(item) =>
+				item._id.toString() === productId.toString() ||
+				item._id.equals?.(productIdToRemove)
 		);
 
-		if (!updatedUser) {
+		if (cartItemIndex === -1) {
 			return NextResponse.json(
-				{ message: "Failed to remove product from cart" },
+				{ message: "Product not found in cart" },
 				{ status: 404 }
 			);
 		}
 
+		// Remove the item from the cart array
+		user.cart.splice(cartItemIndex, 1);
+
+		// Save the updated user document
+		await user.save();
+
 		return NextResponse.json({
 			message: "Product removed from cart successfully",
-			cart: updatedUser.cart,
+			cart: user.cart,
 		});
 	} catch (error) {
 		console.error("Error removing product:", error);

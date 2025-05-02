@@ -12,6 +12,7 @@ import {
 	Menu,
 	Package,
 	LogOut,
+	MessageSquare,
 } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -50,6 +51,7 @@ const categories = [
 	{ name: "Groceries", url: "/category/groceries" },
 	{ name: "Sports & Outdoors", url: "/category/sports" },
 	{ name: "Automotive", url: "/category/automotive" },
+	{ name: "Discount", url: "/discount" },
 ];
 
 export default function Navbar() {
@@ -111,6 +113,17 @@ export default function Navbar() {
 										>
 											Help Center
 										</Link>
+										{session && (
+											<Link
+												href="/chat"
+												className="block py-2 px-4 hover:bg-orange-50 hover:text-orange-500 rounded-md"
+											>
+												<div className="flex items-center gap-2">
+													<MessageSquare className="h-4 w-4" />
+													<span>Messages</span>
+												</div>
+											</Link>
+										)}
 										<Link
 											href="/sell"
 											className="block py-2 px-4 hover:bg-orange-50 hover:text-orange-500 rounded-md"
@@ -202,6 +215,19 @@ export default function Navbar() {
 								<span className="text-xs hidden md:inline-block">Wishlist</span>
 							</Link>
 
+							{/* Chat Messages */}
+							{session && (
+								<Link
+									href="/chat"
+									className="flex flex-col items-center p-1 text-gray-700 hover:text-orange-500"
+								>
+									<div className="relative">
+										<MessageSquare size={24} />
+									</div>
+									<span className="text-xs hidden md:inline-block">Chat</span>
+								</Link>
+							)}
+
 							{/* Notifications */}
 							{session && (
 								<div className="flex flex-col items-center p-1 text-gray-700 hover:text-orange-500  sm:flex">
@@ -246,26 +272,12 @@ export default function Navbar() {
 												My Orders
 											</Link>
 										</DropdownMenuItem>
-										{/* <DropdownMenuItem>
-											<Link href="dashboard/user/returns" className="w-full">
-												My Returns
+										<DropdownMenuItem>
+											<Link href="/chat" className="w-full flex items-center gap-2">
+												<MessageSquare className="h-4 w-4" />
+												<span>Messages</span>
 											</Link>
 										</DropdownMenuItem>
-										<DropdownMenuItem>
-											<Link href="dashboard/user/cancellations" className="w-full">
-												My Cancellations
-											</Link>
-										</DropdownMenuItem>
-										<DropdownMenuItem>
-											<Link href="dashboard/user/reviews" className="w-full">
-												My Reviews
-											</Link>
-										</DropdownMenuItem>
-										<DropdownMenuItem>
-											<Link href="dashboard/user/vouchers" className="w-full">
-												My Vouchers
-											</Link>
-										</DropdownMenuItem> */}
 										{session.user.role === "user" && (
 											<DropdownMenuItem asChild className={"cursor-pointer"}>
 												<Link href="/dashboard/user">Dashboard</Link>

@@ -30,15 +30,15 @@ export async function GET(request, { params }) {
 			return NextResponse.json({ error: "Invalid order ID" }, { status: 400 });
 		}
 
-		// Get vendor's products
-		const vendorProducts = await Product.find({ vendor: session.user.id });
+		// Get vendor's products - changed 'vendor' to 'v_id' to match schema
+		const vendorProducts = await Product.find({ v_id: session.user.id });
 		const productIds = vendorProducts.map((product) => product._id);
 
 		// Get the order and check if it contains vendor's products
 		const order = await Order.findById(id)
 			.populate({
 				path: "items.product",
-				select: "name images price vendor",
+				select: "name images price v_id", // Also updated this to include v_id
 			})
 			.populate({
 				path: "user",
@@ -51,7 +51,9 @@ export async function GET(request, { params }) {
 
 		// Filter order items to only include vendor's products
 		const vendorItems = order.items.filter(
-			(item) => item.product && productIds.includes(item.product._id)
+			(item) =>
+				item.product &&
+				productIds.some((id) => id.toString() === item.product._id.toString())
 		);
 
 		if (vendorItems.length === 0) {
@@ -62,7 +64,7 @@ export async function GET(request, { params }) {
 		}
 
 		const totalAmount = vendorItems.reduce((sum, item) => {
-			return sum + item.price * item.quantity;
+			return sum + (item.subtotal || item.price * (item.quantity || 1));
 		}, 0);
 
 		const formattedOrder = {
@@ -130,11 +132,12 @@ export async function PATCH(request, { params }) {
 			return NextResponse.json({ error: "Order not found" }, { status: 404 });
 		}
 
-		const vendorProducts = await Product.find({ vendor: session.user.id });
+		// Changed 'vendor' to 'v_id' to match the database schema
+		const vendorProducts = await Product.find({ v_id: session.user.id });
 		const productIds = vendorProducts.map((product) => product._id.toString());
 
-		const hasVendorProducts = order.items.some((item) =>
-			productIds.includes(item.product._id.toString())
+		const hasVendorProducts = order.items.some(
+			(item) => item.product && productIds.includes(item.product._id.toString())
 		);
 
 		if (!hasVendorProducts) {
