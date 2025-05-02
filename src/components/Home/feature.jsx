@@ -10,6 +10,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Feature() {
 	const [products, loading, error] = useProduct();
+	// Limit products to only 10 items
+	const limitedProducts = products?.slice(0, 10) || [];
 
 	const skeletonCards = Array(10)
 		.fill(0)
@@ -49,7 +51,7 @@ export default function Feature() {
 			<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
 				{loading
 					? skeletonCards
-					: products?.map((product) => (
+					: limitedProducts.map((product) => (
 							<Card
 								key={product._id}
 								className="group relative hover:shadow-lg transition-shadow h-full pt-0 pb-2 rounded-t-none rounded-b-none"

@@ -33,10 +33,9 @@ export async function GET() {
 		const orders = await Order.find({
 			"items.product": { $in: productIds },
 		})
-
 			.populate({
 				path: "items.product",
-				select: "name images price vendor",
+				select: "name images price v_id",
 			})
 			.populate({
 				path: "user",
@@ -46,12 +45,17 @@ export async function GET() {
 
 		// Format orders to include only vendor's items
 		const formattedOrders = orders.map((order) => {
+			// Filter to items where the product belongs to this vendor
 			const vendorItems = order.items.filter((item) => {
-				return item.product && productIds.includes(item.product._id);
+				return (
+					item.product &&
+					productIds.some((id) => id.toString() === item.product._id.toString())
+				);
 			});
 
+			// Calculate total for just this vendor's items
 			const totalAmount = vendorItems.reduce((sum, item) => {
-				return sum + item.price * item.quantity;
+				return sum + (item.subtotal || item.price * item.quantity);
 			}, 0);
 
 			return {
@@ -61,7 +65,21 @@ export async function GET() {
 				status: order.status,
 				paymentStatus: order.paymentStatus,
 				paymentMethod: order.paymentMethod,
-				items: vendorItems,
+				items: vendorItems.map((item) => ({
+					...item.toObject(),
+					// Ensure we have product details
+					product: item.product
+						? {
+								_id: item.product._id,
+								name: item.product.name,
+								images: item.product.images || [],
+								price: item.price || item.product.price,
+						  }
+						: null,
+					quantity: item.quantity || 1,
+					price: item.price,
+					subtotal: item.subtotal || item.price * (item.quantity || 1),
+				})),
 				totalAmount,
 				customerName: order.user?.name || "Anonymous",
 				customerEmail: order.user?.email,

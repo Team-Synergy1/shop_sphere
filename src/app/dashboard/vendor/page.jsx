@@ -9,6 +9,7 @@ import {
 	Settings,
 	ShoppingCart,
 	Users,
+	MessageSquare,
 } from "lucide-react";
 import {
 	ResponsiveContainer,
@@ -104,7 +105,7 @@ console.log("dash", data);
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">
-							৳{stats.totalRevenue.toFixed(2)}
+								৳{stats.totalRevenue.toFixed(2)}
 						</div>
 						<p className="text-xs text-muted-foreground">
 							{stats.revenueChange >= 0 ? "+" : ""}
@@ -184,7 +185,7 @@ console.log("dash", data);
 											{order.customerName}
 										</p>
 										<p className="text-sm text-muted-foreground">
-											৳{order.amount.toFixed(2)} · {order.status}
+												৳{order.amount.toFixed(2)} · {order.status}
 										</p>
 									</div>
 									<div className="ml-auto font-medium">
@@ -266,6 +267,17 @@ console.log("dash", data);
 								<Link href="/dashboard/vendor/analytics">
 									<BarChart2 className="mr-2 h-4 w-4" />
 									View Analytics
+								</Link>
+							</Button>
+							<Button
+								className="w-full justify-start"
+								size="sm"
+								variant="outline"
+								asChild
+							>
+								<Link href="/dashboard/vendor/messages">
+									<MessageSquare className="mr-2 h-4 w-4" />
+									Customer Messages
 								</Link>
 							</Button>
 							<Button

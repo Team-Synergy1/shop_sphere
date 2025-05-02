@@ -14,9 +14,18 @@ export default function WishlistButton({ productId }) {
 	const { data: session, status } = useSession();
 	const [inWishlist, setInWishlist] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
+	const [isVendorOrAdmin, setIsVendorOrAdmin] = useState(false);
 
 	useEffect(() => {
-		if (!productId || status !== "authenticated") {
+		if (status === "authenticated" && session) {
+			// Check if user is a vendor or admin
+			const role = session.user.role;
+			setIsVendorOrAdmin(role === "vendor" || role === "admin");
+		}
+	}, [session, status]);
+
+	useEffect(() => {
+		if (!productId || status !== "authenticated" || isVendorOrAdmin) {
 			return;
 		}
 
@@ -44,12 +53,18 @@ export default function WishlistButton({ productId }) {
 		};
 
 		checkWishlistStatus();
-	}, [productId, status]);
+	}, [productId, status, isVendorOrAdmin]);
 
 	const handleWishlistToggle = async () => {
 		if (status !== "authenticated") {
 			const returnUrl = encodeURIComponent(window.location.pathname);
 			router.push(`/login?callbackUrl=${returnUrl}`);
+			return;
+		}
+
+		// Prevent vendors and admins from adding to wishlist
+		if (isVendorOrAdmin) {
+			toast.error("Vendors and admins cannot add products to wishlist");
 			return;
 		}
 
@@ -70,6 +85,11 @@ export default function WishlistButton({ productId }) {
 			setIsLoading(false);
 		}
 	};
+
+	// Don't render wishlist button for vendors and admins
+	if (isVendorOrAdmin) {
+		return null;
+	}
 
 	return (
 		<Button
