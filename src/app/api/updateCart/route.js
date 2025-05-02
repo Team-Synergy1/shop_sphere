@@ -4,7 +4,6 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import User from "@/models/User";
 
-// Helper function to validate user session and get user data
 async function getUserFromSession(session) {
 	if (!session?.user) {
 		return { error: "Unauthorized. Please log in.", status: 401 };
@@ -16,8 +15,7 @@ async function getUserFromSession(session) {
 		return { error: "User not found.", status: 404 };
 	}
 
-	// Removing the role restriction to allow all user types to access the cart
-	// This allows vendors and admins to use the cart functionality as well
+
 
 	return { user };
 }
@@ -43,7 +41,6 @@ export async function POST(req) {
 			);
 		}
 
-		// Use atomic update to modify the quantity of the specific cart item
 		const updatedUser = await User.findOneAndUpdate(
 			{
 				_id: userResult.user._id,

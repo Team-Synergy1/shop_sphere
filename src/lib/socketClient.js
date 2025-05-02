@@ -4,26 +4,37 @@ import { io } from 'socket.io-client';
 let socket;
 
 export const initializeSocket = () => {
-  if (!socket) {
+  if (!socket && typeof window !== 'undefined') {
+    // Get the base URL from the browser's location or use the NEXT_PUBLIC_APP_URL
     const socketUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
-    socket = io(socketUrl, {
-      path: '/api/socket/io',
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-      autoConnect: true,
-    });
+    
+    // First make a request to the API route to initialize the socket server
+    fetch(`${socketUrl}/api/socket/io`)
+      .then(() => {
+        // Then connect to the socket
+        socket = io(socketUrl, {
+          path: '/api/socket/io',
+          addTrailingSlash: false,
+          reconnectionAttempts: 5,
+          reconnectionDelay: 1000,
+          autoConnect: true,
+        });
 
-    socket.on('connect', () => {
-      console.log('Socket connected:', socket.id);
-    });
+        socket.on('connect', () => {
+          console.log('Socket connected:', socket.id);
+        });
 
-    socket.on('connect_error', (err) => {
-      console.error('Socket connection error:', err.message);
-    });
+        socket.on('connect_error', (err) => {
+          console.error('Socket connection error:', err.message);
+        });
 
-    socket.on('disconnect', (reason) => {
-      console.log('Socket disconnected:', reason);
-    });
+        socket.on('disconnect', (reason) => {
+          console.log('Socket disconnected:', reason);
+        });
+      })
+      .catch(err => {
+        console.error('Error initializing socket server:', err);
+      });
   }
 
   return socket;

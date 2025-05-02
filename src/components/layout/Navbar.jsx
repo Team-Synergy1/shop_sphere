@@ -250,7 +250,10 @@ export default function Navbar() {
 											className="relative h-9 w-9 rounded-full cursor-pointer p-0"
 										>
 											<Avatar className="h-9 w-9">
-												<AvatarImage src={session.user?.image || ""} alt={session.user?.name} />
+												<AvatarImage
+													src={session.user?.image || ""}
+													alt={session.user?.name}
+												/>
 												<AvatarFallback className="bg-primary/10 text-primary">
 													{session.user?.name?.charAt(0)}
 												</AvatarFallback>
@@ -274,8 +277,11 @@ export default function Navbar() {
 											</Link>
 										</DropdownMenuItem>
 										<DropdownMenuItem>
-											<Link href="/chat" className="w-full flex items-center gap-2">
-												<MessageSquare className="h-4 w-4" />
+											<Link
+												href="/chat"
+												className="w-full flex items-center gap-2"
+											>
+												
 												<span>Messages</span>
 											</Link>
 										</DropdownMenuItem>

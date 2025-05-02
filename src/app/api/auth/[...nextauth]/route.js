@@ -126,12 +126,32 @@ export const authOptions = {
 			}
 			return true;
 		},
+		async jwt({ token, user }) {
+			if (user) {
+				token.id = user.id;
+				token.role = user.role;
+			}
+			return token;
+		},
+		async session({ session, token }) {
+			if (token) {
+				session.user.id = token.id;
+				session.user.role = token.role;
+			}
+			return session;
+		},
+		async redirect({ url, baseUrl }) {
+			// Allows relative callback URLs
+			if (url.startsWith("/")) return `${baseUrl}${url}`;
+			// Allows callback URLs on the same origin
+			else if (new URL(url).origin === baseUrl) return url;
+			return baseUrl;
+		},
 	},
 	session: {
 		strategy: "jwt",
-		maxAge: 30 * 24 * 60 * 60, // 30 days
 	},
-	secret: process.env.NEXTAUTH_SECRET,
+	secret: process.env.NEXT_AUTH_SECRET,
 };
 
 const handler = NextAuth(authOptions);

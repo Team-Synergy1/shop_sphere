@@ -73,14 +73,14 @@ export default function Login() {
 	};
 
 	const handleGoogleSignIn = async () => {
-		if (!navigator.cookieEnabled) {
-			toast.error("Please enable cookies to sign in");
-			return;
-		}
-
 		setIsLoading(true);
 		try {
-			await signIn("google", { callbackUrl });
+			// For Google OAuth, we need to use redirect: true for the proper flow
+			await signIn("google", {
+				callbackUrl: "/",
+				redirect: true,
+			});
+			// Note: Code below won't execute with redirect: true
 		} catch (error) {
 			toast.error("An error occurred with Google sign in");
 			setIsLoading(false);

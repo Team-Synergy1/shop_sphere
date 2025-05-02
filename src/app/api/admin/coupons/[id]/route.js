@@ -11,7 +11,7 @@ export async function GET(request, { params }) {
     
     // Verify admin role
     const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== "admin") {
+    if (!session || session.user?.role !== "admin") {
       return NextResponse.json(
         { message: "Unauthorized: Admin access required" },
         { status: 403 }
