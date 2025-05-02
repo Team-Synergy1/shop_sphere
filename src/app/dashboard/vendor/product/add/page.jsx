@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Plus, Trash2, Upload, X } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -68,6 +69,7 @@ const productSchema = z.object({
 
 export default function AddProductPage() {
 	const router = useRouter();
+	const { data: session, status } = useSession();
 	const [colors, setColors] = useState([]);
 	const [features, setFeatures] = useState([]);
 	const [newColor, setNewColor] = useState("");
@@ -82,6 +84,19 @@ export default function AddProductPage() {
 
 	const image_host_Api = `https://api.imgbb.com/1/upload?key=${image_host_key}`;
 	const [isUploading, setIsUploading] = useState(false);
+
+	// Check if user is a vendor
+	useEffect(() => {
+		if (status === "authenticated" && session) {
+			if (session.user.role !== "vendor") {
+				// Redirect non-vendors to unauthorized page
+				router.push("/unauthorized");
+			}
+		} else if (status === "unauthenticated") {
+			// Redirect unauthenticated users to login
+			router.push("/login?callbackUrl=/dashboard/vendor/product/add");
+		}
+	}, [session, status, router]);
 
 	useEffect(() => {
 		if (image_host_key) {
@@ -249,6 +264,7 @@ export default function AddProductPage() {
 				features,
 				specs: formattedSpecs,
 				images,
+				// No need to manually set v_id here as the API will use the session user ID
 			};
 			console.log(productData);
 			const response = await fetch("/api/products", {
@@ -279,11 +295,23 @@ export default function AddProductPage() {
 			setActiveTab("basic"); // Reset to basic tab
 
 			toast.success("Product created successfully");
+
+			// Redirect to product list after successful creation
+			router.push("/dashboard/vendor/allProduct");
 		} catch (error) {
 			console.error("Error creating product:", error);
 			toast.error("Failed to create product: " + error.message);
 		}
 	};
+
+	// If not authenticated or loading, show loading state
+	if (
+		status === "loading" ||
+		(status === "authenticated" && session.user.role !== "vendor")
+	) {
+		return <div className="container mx-auto py-6 text-center">Loading...</div>;
+	}
+
 	return (
 		<div className="container mx-auto py-6 space-y-6">
 			<div className="flex justify-between items-center">

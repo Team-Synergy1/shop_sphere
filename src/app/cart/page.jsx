@@ -6,15 +6,16 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Loader from "../loading";
-import { loadStripe } from "@stripe/stripe-js";
 import useProduct from "@/hooks/useProduct";
 import PurchaseButton from "@/components/PurchaseButton";
 import { useCartStore } from "@/store/useCartStore";
+import CouponApplier from "@/components/share/CouponApplier";
 
 export default function CartPage() {
 	const [cartItems, setCartItems] = useState([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState(null);
+	const [appliedCoupon, setAppliedCoupon] = useState(null);
 	const { data: session, status } = useSession();
 	const router = useRouter();
 	const [products] = useProduct();
@@ -29,6 +30,14 @@ export default function CartPage() {
 	const totalItemsCount = cartItems.reduce((count, item) => {
 		return count + (item.quantity || 1);
 	}, 0);
+
+	// Calculate discount amount if a coupon is applied
+	const discountAmount = appliedCoupon
+		? appliedCoupon.calculatedDiscount || 0
+		: 0;
+
+	// Calculate final total after discount
+	const finalTotal = subtotal - discountAmount;
 
 	useEffect(() => {
 		async function fetchCart() {
@@ -59,7 +68,7 @@ export default function CartPage() {
 		}
 
 		fetchCart();
-	}, []);
+	}, [session, status, router]);
 
 	const updateItemQuantity = async (productId, newQuantity) => {
 		try {
@@ -86,6 +95,12 @@ export default function CartPage() {
 			);
 
 			toast.success("Cart updated successfully");
+
+			// Clear applied coupon when cart changes
+			if (appliedCoupon) {
+				setAppliedCoupon(null);
+				toast.info("Coupon removed due to cart changes");
+			}
 		} catch (err) {
 			console.error("Error updating quantity:", err);
 			toast.error("Failed to update cart. Please try again.");
@@ -111,10 +126,24 @@ export default function CartPage() {
 
 			// Update cart count in Zustand store
 			fetchCartCount();
+
+			// Clear applied coupon when cart changes
+			if (appliedCoupon) {
+				setAppliedCoupon(null);
+				toast.info("Coupon removed due to cart changes");
+			}
 		} catch (err) {
 			console.error("Error removing item:", err);
 			toast.error("Failed to remove item. Please try again.");
 		}
+	};
+
+	const handleApplyCoupon = (couponData) => {
+		setAppliedCoupon(couponData);
+	};
+
+	const handleRemoveCoupon = () => {
+		setAppliedCoupon(null);
 	};
 
 	const handleCheckout = async () => {
@@ -127,22 +156,11 @@ export default function CartPage() {
 		try {
 			setIsLoading(true);
 
-			const product = products?.find((p) => p._id === productId);
-			if (!product) {
-				throw new Error("Product not found");
-			}
-
-			const cartResponse = await fetch("/api/addCart", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify(product),
-			});
-
-			if (!cartResponse.ok) {
-				const error = await cartResponse.json();
-				throw new Error(error.message || "Failed to add item to cart");
+			// Store coupon information in session storage if one is applied
+			if (appliedCoupon) {
+				sessionStorage.setItem("appliedCoupon", JSON.stringify(appliedCoupon));
+			} else {
+				sessionStorage.removeItem("appliedCoupon");
 			}
 
 			const addressResponse = await fetch("/api/user/address/check");
@@ -310,11 +328,30 @@ export default function CartPage() {
 						<div className="bg-white p-6 rounded-lg shadow sticky top-8">
 							<h2 className="text-lg font-bold mb-4">Order Summary</h2>
 
-							<div className="space-y-2 mb-4">
+							<div className="space-y-3 mb-4">
 								<div className="flex justify-between">
 									<span>Items ({totalItemsCount})</span>
-									<span> BDT{subtotal.toFixed(2)}</span>
+									<span>BDT{subtotal.toFixed(2)}</span>
 								</div>
+
+								{/* Coupon Applier Component */}
+								<div className="py-3 border-t border-b">
+									<CouponApplier
+										cartSubtotal={subtotal}
+										onApplyCoupon={handleApplyCoupon}
+										onRemoveCoupon={handleRemoveCoupon}
+										appliedCoupon={appliedCoupon}
+									/>
+								</div>
+
+								{/* Discount amount if coupon applied */}
+								{appliedCoupon && (
+									<div className="flex justify-between text-green-600">
+										<span>Discount</span>
+										<span>-BDT{discountAmount.toFixed(2)}</span>
+									</div>
+								)}
+
 								<div className="flex justify-between text-gray-500">
 									<span>Shipping</span>
 									<span>Calculated at checkout</span>
@@ -324,14 +361,17 @@ export default function CartPage() {
 							<div className="border-t pt-4">
 								<div className="flex justify-between font-bold mb-6">
 									<span>Total</span>
-									<span> BDT{subtotal.toFixed(2)}</span>
+									<span>BDT{finalTotal.toFixed(2)}</span>
 								</div>
 
-								<div className="space-y-4 flex flex-col ">
-									<PurchaseButton
-										productId={null}
-										className="w-full  bg-orange-500 hover:bg-orange-600 text-white"
-									/>
+								<div className="space-y-4 flex flex-col">
+									<button
+										onClick={handleCheckout}
+										className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-md font-medium"
+										disabled={isLoading}
+									>
+										{isLoading ? "Processing..." : "Proceed to Checkout"}
+									</button>
 
 									<Link
 										href="/products"

@@ -38,27 +38,7 @@ export default function VendorAnalyticsPage() {
 	const router = useRouter();
 	const [loading, setLoading] = useState(true);
 	const [timeRange, setTimeRange] = useState("7d");
-	const [analytics, setAnalytics] = useState({
-		revenue: {
-			total: 0,
-			change: 0,
-			data: [],
-		},
-		orders: {
-			total: 0,
-			change: 0,
-			data: [],
-		},
-		products: {
-			total: 0,
-			topSelling: [],
-		},
-		customers: {
-			total: 0,
-			new: 0,
-			returning: 0,
-		},
-	});
+	const [analytics, setAnalytics] = useState(null);
 
 	useEffect(() => {
 		if (status === "unauthenticated") {
@@ -81,13 +61,14 @@ export default function VendorAnalyticsPage() {
 				`/api/vendor/analytics?timeRange=${timeRange}`
 			);
 			const data = await response.json();
-   
 
 			if (!response.ok) {
 				throw new Error(data.error || "Failed to fetch analytics");
 			}
 
+			// Store the entire analytics object
 			setAnalytics(data.analytics);
+			console.log("Analytics data:", data.analytics);
 		} catch (error) {
 			console.error("Error fetching analytics:", error);
 			toast.error(error.message || "Failed to load analytics");
@@ -97,6 +78,25 @@ export default function VendorAnalyticsPage() {
 	};
 
 	if (loading) return <Loader />;
+
+	// Create a default empty structure if analytics is null
+	if (!analytics) {
+		return <div>No analytics data available</div>;
+	}
+
+	// Format revenue data for chart display if available
+	const revenueChartData =
+		analytics.revenue?.data?.map((item) => ({
+			date: item.date.substring(0, 10), // Just get the date part
+			amount: Number(item.amount),
+		})) || [];
+
+	// Format order data for chart display if available
+	const orderChartData =
+		analytics.orders?.data?.map((item) => ({
+			date: item.date.substring(0, 10), // Just get the date part
+			count: Number(item.count),
+		})) || [];
 
 	return (
 		<div className="container mx-auto p-6">
@@ -122,17 +122,18 @@ export default function VendorAnalyticsPage() {
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">
-							৳{analytics.revenue.total.toFixed(2)}
+							৳{Number(analytics.revenue?.total || 0).toFixed(2)}
 						</div>
 						<p
 							className={`text-xs ${
-								analytics.revenue.change >= 0
+								Number(analytics.revenue?.change || 0) >= 0
 									? "text-green-600"
 									: "text-red-600"
 							}`}
 						>
-							{analytics.revenue.change >= 0 ? "+" : ""}
-							{analytics.revenue.change}% from previous period
+							{Number(analytics.revenue?.change || 0) >= 0 ? "+" : ""}
+							{Number(analytics.revenue?.change || 0).toFixed(1)}% from previous
+							period
 						</p>
 					</CardContent>
 				</Card>
@@ -142,14 +143,19 @@ export default function VendorAnalyticsPage() {
 						<CardTitle className="text-sm font-medium">Total Orders</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">{analytics.orders.total}</div>
+						<div className="text-2xl font-bold">
+							{analytics.orders?.total || 0}
+						</div>
 						<p
 							className={`text-xs ${
-								analytics.orders.change >= 0 ? "text-green-600" : "text-red-600"
+								Number(analytics.orders?.change || 0) >= 0
+									? "text-green-600"
+									: "text-red-600"
 							}`}
 						>
-							{analytics.orders.change >= 0 ? "+" : ""}
-							{analytics.orders.change}% from previous period
+							{Number(analytics.orders?.change || 0) >= 0 ? "+" : ""}
+							{Number(analytics.orders?.change || 0).toFixed(1)}% from previous
+							period
 						</p>
 					</CardContent>
 				</Card>
@@ -159,7 +165,9 @@ export default function VendorAnalyticsPage() {
 						<CardTitle className="text-sm font-medium">Products</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">{analytics.products.total}</div>
+						<div className="text-2xl font-bold">
+							{analytics.products?.total || 0}
+						</div>
 						<p className="text-xs text-muted-foreground">Active products</p>
 					</CardContent>
 				</Card>
@@ -170,10 +178,10 @@ export default function VendorAnalyticsPage() {
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">
-							{analytics.customers.total}
+							{analytics.customers?.total || 0}
 						</div>
 						<p className="text-xs text-green-600">
-							+{analytics.customers.new} new customers
+							+{analytics.customers?.new || 0} new customers
 						</p>
 					</CardContent>
 				</Card>
@@ -186,7 +194,7 @@ export default function VendorAnalyticsPage() {
 					</CardHeader>
 					<CardContent className="h-[300px]">
 						<ResponsiveContainer width="100%" height="100%">
-							<BarChart data={analytics.revenue.data}>
+							<BarChart data={revenueChartData}>
 								<CartesianGrid strokeDasharray="3 3" />
 								<XAxis dataKey="date" />
 								<YAxis />
@@ -203,7 +211,7 @@ export default function VendorAnalyticsPage() {
 					</CardHeader>
 					<CardContent className="h-[300px]">
 						<ResponsiveContainer width="100%" height="100%">
-							<BarChart data={analytics.orders.data}>
+							<BarChart data={orderChartData}>
 								<CartesianGrid strokeDasharray="3 3" />
 								<XAxis dataKey="date" />
 								<YAxis />
@@ -224,27 +232,40 @@ export default function VendorAnalyticsPage() {
 				</CardHeader>
 				<CardContent>
 					<div className="divide-y">
-						{analytics.products.topSelling.map((product) => (
+						{(analytics.products?.topSelling || []).map((product) => (
 							<div
-								key={product._id}
+								key={product.id || product._id}
 								className="py-4 flex items-center justify-between"
 							>
 								<div className="flex items-center gap-4">
 									<img
-										src={product.image}
+										src={
+											product.image ||
+											(product.product?.images && product.product.images[0]) ||
+											"/placeholder-product.jpg"
+										}
 										alt={product.name}
 										className="w-12 h-12 object-cover rounded"
 									/>
 									<div>
 										<p className="font-medium">{product.name}</p>
 										<p className="text-sm text-muted-foreground">
-											{product.unitsSold} units sold
+											{product.sold || product.unitsSold || 0} units sold
 										</p>
 									</div>
 								</div>
-								<p className="font-medium">৳{product.revenue.toFixed(2)}</p>
+								<p className="font-medium">
+									৳{Number(product.revenue || 0).toFixed(2)}
+								</p>
 							</div>
 						))}
+
+						{(!analytics.products?.topSelling ||
+							analytics.products.topSelling.length === 0) && (
+							<div className="py-4 text-center text-muted-foreground">
+								No sales data available for this period
+							</div>
+						)}
 					</div>
 				</CardContent>
 			</Card>

@@ -26,6 +26,7 @@ import {
 	FileText,
 	DollarSign,
 	Layers,
+	Percent,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -183,6 +184,11 @@ export default function DashboardLayout({ children }) {
 					href: "/dashboard/admin/orders",
 					icon: <ShoppingCart className="h-5 w-5" />,
 					label: "Orders",
+				},
+				{
+					href: "/dashboard/admin/coupons",
+					icon: <Percent className="h-5 w-5" />,
+					label: "Coupons",
 				},
 				{
 					href: "/dashboard/admin/categories",

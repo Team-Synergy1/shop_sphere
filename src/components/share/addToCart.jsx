@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ShoppingCart, Check } from "lucide-react";
 import useProduct from "@/hooks/useProduct";
 import axios from "axios";
@@ -13,10 +13,19 @@ export default function AddToCart({ id, size, className = "", onAddedToCart }) {
 	const [isLoading, setIsLoading] = useState(false);
 	const router = useRouter();
 	const { data: session, status } = useSession();
+	const [isVendorOrAdmin, setIsVendorOrAdmin] = useState(false);
 
 	const [products] = useProduct();
 	const product = products?.find((p) => p._id == id);
 	const fetchCartCount = useCartStore((state) => state.fetchCartCount);
+
+	useEffect(() => {
+		if (status === "authenticated" && session) {
+			// Check if user is a vendor or admin
+			const role = session.user.role;
+			setIsVendorOrAdmin(role === "vendor" || role === "admin");
+		}
+	}, [session, status]);
 
 	const handleAddToCart = async () => {
 		if (status === "unauthenticated") {
@@ -27,6 +36,13 @@ export default function AddToCart({ id, size, className = "", onAddedToCart }) {
 			router.push(`/login?callbackUrl=${returnUrl}`);
 			return;
 		}
+
+		// Prevent vendors and admins from adding to cart
+		if (isVendorOrAdmin) {
+			toast.error("Vendors and admins cannot add products to cart");
+			return;
+		}
+
 		if (onAddedToCart && typeof onAddedToCart === "function") {
 			onAddedToCart();
 		}
@@ -57,6 +73,11 @@ export default function AddToCart({ id, size, className = "", onAddedToCart }) {
 			setIsLoading(false);
 		}
 	};
+
+	// If user is a vendor or admin, disable the button
+	if (isVendorOrAdmin) {
+		return null; // Don't show the button for vendors and admins
+	}
 
 	return (
 		<Button

@@ -16,9 +16,8 @@ async function getUserFromSession(session) {
 		return { error: "User not found.", status: 404 };
 	}
 
-	if (user.role === "vendor" || user.role === "admin") {
-		return { error: "Only regular users can access cart", status: 403 };
-	}
+	// Removing the role restriction to allow all user types to access the cart
+	// This allows vendors and admins to use the cart functionality as well
 
 	return { user };
 }

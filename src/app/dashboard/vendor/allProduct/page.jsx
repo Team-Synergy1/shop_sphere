@@ -17,13 +17,13 @@ import {
 	Plus,
 	Filter,
 } from "lucide-react";
-import useProduct from "@/hooks/useProduct";
+import useVendorProducts from "@/hooks/useVendorProducts";
 import { toast } from "sonner";
 import Link from "next/link";
 import Loader from "@/app/loading";
 
 const ProductsManager = () => {
-	const [productData, loading, refetch] = useProduct();
+	const [productData, loading, refetch] = useVendorProducts();
 	const [products, setProducts] = useState([]);
 
 	useEffect(() => {

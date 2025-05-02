@@ -1,5 +1,4 @@
 import { connectDB } from "@/lib/db";
-import { authOptions } from "../auth/[...nextauth]/route";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import User from "@/models/User";
@@ -21,7 +20,10 @@ async function getUserFromSession(session, isPost = false) {
 export async function POST(req) {
 	try {
 		await connectDB();
-		const session = await getServerSession(authOptions);
+		const session = await getServerSession();
+		
+		console.log("Session in addCart:", session); // Add debugging for the session
+		
 		const userResult = await getUserFromSession(session, true);
 
 		if (userResult.error) {
@@ -169,7 +171,10 @@ export async function POST(req) {
 export async function GET() {
 	try {
 		await connectDB();
-		const session = await getServerSession(authOptions);
+		const session = await getServerSession();
+		
+		console.log("Session in GET addCart:", session); // Add debugging for the session
+		
 		const userResult = await getUserFromSession(session);
 
 		if (userResult.error) {
