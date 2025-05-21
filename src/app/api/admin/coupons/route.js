@@ -20,7 +20,7 @@ export async function GET(request) {
 		}
 
 		// Add debugging to see user role
-		console.log("User session:", session.user?.role); 
+		console.log("User session:", session.user?.role);
 
 		if (session.user?.role !== "admin") {
 			return NextResponse.json(

@@ -5,7 +5,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { Check, Plus, X } from 'lucide-react';
 
-export default function CompareButton({ productId, className }) {
+export default function CompareButton({ productId, className}) {
   const queryClient = useQueryClient();
   
   const { data: comparison } = useQuery({
@@ -37,7 +37,7 @@ export default function CompareButton({ productId, className }) {
   return (
     <Button
       variant="outline"
-      size="sm"
+      size="lg"
       className={className}
       onClick={() => mutation.mutate(isInComparison ? 'remove' : 'add')}
       disabled={mutation.isLoading}
